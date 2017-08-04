@@ -5,7 +5,16 @@ include_directories(include)
 
 set(CMAKE_CXX_STANDARD 11)
 
-set(SOURCE_FILES punter/punter.cpp model/GameState.cpp model/Dijkstra.cpp)
+set(SOURCE_FILES
+		punter/punter.cpp
+		model/GameState.cpp
+		model/Dijkstra.cpp
+		model/GameState.h
+		model/Solver.cpp
+		model/Solver.h
+		model/Empire.cpp
+		model/Empire.h)
+
 add_executable(punter ${SOURCE_FILES})
 target_link_libraries(punter PRIVATE -static-libgcc -static-libstdc++ -Wl,-Bstatic -lstdc++ -lpthread -Wl,-Bdynamic)
 
