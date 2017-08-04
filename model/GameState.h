@@ -15,19 +15,20 @@ typedef std::unordered_map<vert_t, punter_t> VertexIncidence;
 class GameState {
 public:
     GameState(std::istream &in);
-	void Serialize(std::ostream &in);
+	void Serialize(std::ostream &in) const;
 
-    vert_t getSitesNum();
-    vert_t getPlayersNum();
-    vert_t getMinesNum();
-    int getCurrentTurnNum();
+    vert_t getSitesNum() const;
+    vert_t getPuntersNum() const;
+    vert_t getMinesNum() const;
+	punter_t getPunterId() const;
+    int getCurrentTurnNum() const;
 
-    bool isEdge(vert_t i, vert_t j);
-	punter_t getClaimerId(vert_t i, vert_t j);
+    bool isEdge(vert_t i, vert_t j) const;
+	punter_t getClaimerId(vert_t i, vert_t j) const;
 
     void claimEdge(vert_t i, vert_t j, punter_t punter);
 
-    bool isMine(vert_t i);
+    bool isMine(vert_t i) const;
 
 	// Whoopsie, I'm exposing implementation.
 	const std::unordered_set<vert_t>& getMines() const;
@@ -40,7 +41,7 @@ private:
 
 	std::unordered_set<vert_t> mines;
 
-    vert_t playersNum;
+    vert_t puntersNum;
 
     punter_t punterId;
 

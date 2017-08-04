@@ -18,7 +18,7 @@ public:
 	/// Path in a graph, classic definition. Starts at a mine, ends somewhere.
 	typedef std::vector<vert_t> Path;
 	// ALL the player's paths.
-	const std::vector<Path>& getPaths() const;
+	const std::vector<Path> getPaths() const;
 
 	long getScore() const;
 	long getScore(vert_t from, vert_t to);

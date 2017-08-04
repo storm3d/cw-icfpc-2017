@@ -19,10 +19,14 @@ GameState getSampleGameState()
     return state;
 }
 
-TEST_CASE( "GameState.getPlayersNum() should return correct value", "[GameState]" ) {
-    REQUIRE( getSampleGameState().getPlayersNum() == 2 );
+TEST_CASE( "GameState.getPuntersNum() should return correct value", "[GameState]" ) {
+    REQUIRE( getSampleGameState().getPuntersNum() == 2 );
 }
 
 TEST_CASE( "GameState.getSitesNum() should return correct value", "[GameState]" ) {
     REQUIRE( getSampleGameState().getSitesNum() == 8 );
+}
+
+TEST_CASE( "GameState.getPunterId() should return correct value", "[GameState]" ) {
+    REQUIRE( getSampleGameState().getPunterId() == 0 );
 }

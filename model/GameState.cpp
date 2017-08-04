@@ -8,7 +8,8 @@ using json = nlohmann::json;
 GameState::GameState(std::istream &in) {
 	json j;
 	in >> j;
-	playersNum = j["punters"];
+	puntersNum = j["punters"];
+    punterId = j["punter"];
 
 	if(j["map"].is_object())
 	{
@@ -25,23 +26,33 @@ GameState::GameState(std::istream &in) {
     }
 }
 
-vert_t GameState::getPlayersNum() {
-	return playersNum;
+void GameState::Serialize(std::ostream &out) const {
+    json j;
+    j["punters"] = puntersNum;
+    out << j;
 }
 
-vert_t GameState::getSitesNum() {
+vert_t GameState::getPuntersNum() const {
+	return puntersNum;
+}
+
+punter_t GameState::getPunterId() const {
+    return punterId;
+}
+
+vert_t GameState::getSitesNum() const {
 	return incidence_list.size();
 }
 
-vert_t GameState::getMinesNum() {
+vert_t GameState::getMinesNum() const {
 	return mines.size();
 }
 
-bool GameState::isMine(vert_t i) {
+bool GameState::isMine(vert_t i) const {
 	return mines.find(i) != mines.end();
 }
 
-bool GameState::isEdge(vert_t from, vert_t to) {
+bool GameState::isEdge(vert_t from, vert_t to) const {
 	if (from > to)
 	{
 		vert_t tmp = from;
@@ -55,7 +66,7 @@ bool GameState::isEdge(vert_t from, vert_t to) {
 	return it != incidence_list[from].end();
 }
 
-punter_t GameState::getClaimerId(vert_t from, vert_t to) {
+punter_t GameState::getClaimerId(vert_t from, vert_t to) const {
 	if (from > to)
 	{
 		vert_t tmp = from;
@@ -74,7 +85,7 @@ punter_t GameState::getClaimerId(vert_t from, vert_t to) {
 	return 0;
 }
 
-void GameState::claimEdge(vert_t from, vert_t to, punter_t punter) {
+void GameState::claimEdge(vert_t from, vert_t to, punter_t punter)  {
 	if (from > to)
 	{
 		vert_t tmp = from;
