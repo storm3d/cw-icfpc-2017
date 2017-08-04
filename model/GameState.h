@@ -35,6 +35,8 @@ public:
 
 	const std::unordered_map<vert_t, punter_t>& getEdgesFrom(vert_t vertex) const;
 
+	void initMinDistances();
+
 private:
 
 	std::vector<VertexIncidence> incidence_list;
@@ -47,8 +49,8 @@ private:
 
     int currentTurn;
 
-	// min distance between vertices
-	std::vector<std::vector<vert_t>> min_distance;
+	// min distance between mines and other vertices
+	std::unordered_map<vert_t, std::vector<vert_t>> min_distances;
 };
 
 #endif //CW_ICFPC_2017_STATE_H
