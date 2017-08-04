@@ -1,0 +1,19 @@
+{
+  "name": "cw-visual",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "socket": "node socket_server.js",
+    "static": "node static_server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "connect": "^3.6.3",
+    "fs": "0.0.1-security",
+    "serve-static": "^1.12.3",
+    "ws": "^3.1.0"
+  }
+}
