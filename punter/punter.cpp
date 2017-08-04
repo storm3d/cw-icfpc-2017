@@ -8,8 +8,6 @@ int main( int argc, char* argv[] ) {
 
     GameState state(std::cin);
 
-    // create an empty structure (null)
-
     std::cout << state.getPlayersNum() << std::endl;
 
     std::cout << "Execution time: " << float( clock () - begin_time ) / CLOCKS_PER_SEC << " sec" << std::endl;

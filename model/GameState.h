@@ -40,7 +40,7 @@ private:
 
     vert_t playersNum;
 
-    int punterId;
+    punter_t punterId;
 
     int currentTurn;
 };

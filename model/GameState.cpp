@@ -9,6 +9,16 @@ GameState::GameState(std::istream &in) {
 	json j;
 	in >> j;
 	playersNum = j["punters"];
+
+	if(j["map"].is_object())
+	{
+		json &map = j["map"];
+		if(map["sites"].is_array()) {
+			for (auto& element : map["sites"]) {
+				//std::cout << element << '\n';
+			}
+        }
+    }
 }
 
 vert_t GameState::getPlayersNum() {
