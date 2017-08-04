@@ -34,7 +34,7 @@ protected:
     std::vector<vert_t> vertices;
     std::vector<vert_t> mines;
 
-    int playersNum;
+    vert_t playersNum;
 
     int punterId;
 

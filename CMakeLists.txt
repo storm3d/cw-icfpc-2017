@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD 11)
 
 set(SOURCE_FILES punter/punter.cpp model/GameState.cpp model/GameState.h)
 add_executable(punter ${SOURCE_FILES})
+target_link_libraries(punter PRIVATE -static-libgcc -static-libstdc++ -Wl,-Bstatic -lstdc++ -lpthread -Wl,-Bdynamic)
 
 set(SOURCE_FILES local_runner/local_runner.cpp)
 add_executable(local_runner ${SOURCE_FILES})
