@@ -33,9 +33,9 @@ public: bool operator ()(pii &p1 , pii &p2) {
 //vis - visited array
 //dis - storing shortest distance from source to every vertex
 //adj - Adjacency List. source vertex->destination vertex
-void Dijkstra(vert_t s, vert_t n, vector<vector<vert_t>> adj, vert_t dis[]) {
+void Dijkstra(vert_t s, vert_t n, vector<vector<vert_t>> &adj, vector<vert_t> &dis) {
     vector<bool> vis(n);
-    for (int i = 0; i <= n; i++) {
+    for (int i = 0; i < n; i++) {
         vis[i] = false;
         dis[i] = INT_MAX;
     }

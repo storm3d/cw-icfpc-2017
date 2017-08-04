@@ -6,12 +6,13 @@ using namespace std;
 #include "../include/catch.hpp"
 #include "../model/Dijkstra.h"
 
+
 TEST_CASE("no adjacent vertices") {
     unsigned int vertices = 3;
 
     vector<vector<vert_t>> adj(vertices);
 
-    vert_t min_distance[vertices];
+    vector<vert_t> min_distance(vertices);
 
     Dijkstra(1, vertices, adj, min_distance);
 
@@ -19,6 +20,7 @@ TEST_CASE("no adjacent vertices") {
     REQUIRE(min_distance[0] == INT_MAX);
     REQUIRE(min_distance[2] == INT_MAX);
 }
+
 
 TEST_CASE("two adjacent vertices 0 - 1 - 2") {
     unsigned int vertices = 3;
@@ -29,7 +31,7 @@ TEST_CASE("two adjacent vertices 0 - 1 - 2") {
     adj[1].push_back(2);
     adj[2].push_back(1);
 
-    vert_t min_distance[vertices];
+    vector<vert_t> min_distance;
 
     Dijkstra(0, vertices, adj, min_distance);
 
@@ -53,7 +55,7 @@ TEST_CASE("cycled graph") {
     adj[2].push_back(0);
     adj[2].push_back(1);
 
-    vert_t min_distance[vertices];
+    vector<vert_t> min_distance;
 
     Dijkstra(0, vertices, adj, min_distance);
 
