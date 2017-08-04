@@ -14,7 +14,7 @@ TEST_CASE("no adjacent vertices") {
 
     vector<vert_t> min_distance(vertices);
 
-    Dijkstra(1, vertices, adj, min_distance);
+    Dijkstra(1, adj, min_distance);
 
     REQUIRE(min_distance[1] == 0);
     REQUIRE(min_distance[0] == INT_MAX);
@@ -31,9 +31,9 @@ TEST_CASE("two adjacent vertices 0 - 1 - 2") {
     adj[1].push_back(2);
     adj[2].push_back(1);
 
-    vector<vert_t> min_distance;
+    vector<vert_t> min_distance(vertices);
 
-    Dijkstra(0, vertices, adj, min_distance);
+    Dijkstra(0, adj, min_distance);
 
     REQUIRE(min_distance[0] == 0);
     REQUIRE(min_distance[1] == 1);
@@ -55,9 +55,9 @@ TEST_CASE("cycled graph") {
     adj[2].push_back(0);
     adj[2].push_back(1);
 
-    vector<vert_t> min_distance;
+    vector<vert_t> min_distance(vertices);
 
-    Dijkstra(0, vertices, adj, min_distance);
+    Dijkstra(0, adj, min_distance);
 
     REQUIRE(min_distance[0] == 0);
     REQUIRE(min_distance[1] == 1);

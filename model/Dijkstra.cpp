@@ -29,13 +29,12 @@ public: bool operator ()(pii &p1 , pii &p2) {
 };
 
 //s - source vertex
-//n - number of vertexes
 //vis - visited array
 //dis - storing shortest distance from source to every vertex
 //adj - Adjacency List. source vertex->destination vertex
-void Dijkstra(vert_t s, vert_t n, vector<vector<vert_t>> &adj, vector<vert_t> &dis) {
-    vector<bool> vis(n);
-    for (int i = 0; i < n; i++) {
+void Dijkstra(vert_t s, vector<vector<vert_t>> &adj, vector<vert_t> &dis) {
+    vector<bool> vis(adj.size());
+    for (int i = 0; i < adj.size(); i++) {
         vis[i] = false;
         dis[i] = INT_MAX;
     }
