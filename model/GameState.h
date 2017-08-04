@@ -25,7 +25,7 @@ public:
 
     void claimEdge(vert_t i, vert_t j);
 
-    bool isMine(int i);
+    bool isMine(vert_t i);
 
     void Serialize(std::ostream &in);
 
