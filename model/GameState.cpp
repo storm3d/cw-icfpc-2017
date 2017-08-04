@@ -27,8 +27,11 @@ GameState::GameState(std::istream &in) {
 }
 
 void GameState::Serialize(std::ostream &out) const {
-    json j;
-    j["punters"] = puntersNum;
+    json j = {{"state",
+                      {
+                              {"punters", puntersNum}
+                      }
+    }};
     out << j;
 }
 
