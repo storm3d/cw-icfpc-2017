@@ -5,6 +5,7 @@
 #include <vector>
 #include <iostream>
 
+typedef unsigned short vert_t;
 
 class GameState {
 
@@ -12,26 +13,26 @@ public:
 
     GameState(std::istream &in);
 
-    int getSitesNum();
-    int getPlayersNum();
-    int getMinesNum();
+    vert_t getSitesNum();
+    vert_t getPlayersNum();
+    vert_t getMinesNum();
     int getCurrentTurnNum();
 
-    bool isEdge(int i, int j);
-    bool isClaimed(int i, int j);
+    bool isEdge(vert_t i, vert_t j);
+    bool isClaimed(vert_t i, vert_t j);
     
-    int getClaimerId(int i, int j);
+    int getClaimerId(vert_t i, vert_t j);
 
-    void claimEdge(int i, int j);
+    void claimEdge(vert_t i, vert_t j);
 
-    bool isMine(int i);
+    bool isMine(vert_t i);
 
     void Serialize(std::ostream &in);
 
 protected:
 
-    std::vector<int> vertices;
-    std::vector<int> mines;
+    std::vector<vert_t> vertices;
+    std::vector<vert_t> mines;
 
     int playersNum;
 
