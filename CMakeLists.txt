@@ -5,7 +5,7 @@ include_directories(include)
 
 set(CMAKE_CXX_STANDARD 11)
 
-set(SOURCE_FILES punter/punter.cpp model/State.cpp model/State.h)
+set(SOURCE_FILES punter/punter.cpp model/GameState.cpp model/GameState.h)
 add_executable(punter ${SOURCE_FILES})
 
 set(SOURCE_FILES local_runner/local_runner.cpp)
