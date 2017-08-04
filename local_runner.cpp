@@ -1,5 +1,5 @@
 #include <iostream>
-#include "lib/json.hpp"
+#include "json.hpp"
 
 int main() {
     std::cout << "Local runner for punters" << std::endl;
