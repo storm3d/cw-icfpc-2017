@@ -24,7 +24,7 @@ vert_t GameState::getMinesNum() {
 }
 
 bool GameState::isMine(vert_t i) {
-	return incidence_list[i].is_mine;
+	return mines.find(i) != mines.end();
 }
 
 bool GameState::isEdge(vert_t from, vert_t to) {
@@ -37,8 +37,8 @@ bool GameState::isEdge(vert_t from, vert_t to) {
 
 	assert(to < incidence_list.size());
 
-	auto it = incidence_list[from].edges.find(to);
-	return it != incidence_list[from].edges.end();
+	auto it = incidence_list[from].find(to);
+	return it != incidence_list[from].end();
 }
 
 punter_t GameState::getClaimerId(vert_t from, vert_t to) {
@@ -51,8 +51,8 @@ punter_t GameState::getClaimerId(vert_t from, vert_t to) {
 
 	assert(to < incidence_list.size());
 
-	auto it = incidence_list[from].edges.find(to);
-	if (it != incidence_list[from].edges.end())
+	auto it = incidence_list[from].find(to);
+	if (it != incidence_list[from].end())
 	{
 		return it->second;
 	}
@@ -70,15 +70,15 @@ void GameState::claimEdge(vert_t from, vert_t to, punter_t punter) {
 
 	assert(to < incidence_list.size());
 
-	auto it = incidence_list[from].edges.find(to);
-	if (it != incidence_list[from].edges.end())
+	auto it = incidence_list[from].find(to);
+	if (it != incidence_list[from].end())
 	{
-		incidence_list[from].edges[to] = punter;
+		incidence_list[from][to] = punter;
 	}
 }
 
 const std::unordered_map<vert_t, punter_t> &GameState::getEdgesFrom(vert_t vertex) const {
-	return incidence_list[vertex].edges;
+	return incidence_list[vertex];
 }
 
 const std::unordered_set<vert_t>& GameState::getMines() const {
