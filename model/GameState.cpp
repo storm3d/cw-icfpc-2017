@@ -76,3 +76,11 @@ void GameState::claimEdge(vert_t from, vert_t to, punter_t punter) {
 		incidence_list[from].edges[to] = punter;
 	}
 }
+
+const std::unordered_map<vert_t, punter_t> &GameState::getEdgesFrom(vert_t vertex) const {
+	return incidence_list[vertex].edges;
+}
+
+const std::unordered_set<vert_t>& GameState::getMines() const {
+	return mines;
+}

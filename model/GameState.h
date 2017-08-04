@@ -28,6 +28,11 @@ public:
 
     bool isMine(vert_t i);
 
+	// Whoopsie, I'm exposing implementation.
+	const std::unordered_set<vert_t>& getMines() const;
+
+	const std::unordered_map<vert_t, punter_t>& getEdgesFrom(vert_t vertex) const;
+
 private:
 	struct VertexIncidence
 	{
