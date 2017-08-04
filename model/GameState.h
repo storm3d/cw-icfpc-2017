@@ -10,6 +10,7 @@
 typedef uint64_t vert_t;
 typedef uint64_t punter_t;
 
+typedef std::unordered_map<vert_t, punter_t> VertexIncidence;
 
 class GameState {
 public:
@@ -28,14 +29,15 @@ public:
 
     bool isMine(vert_t i);
 
+	// Whoopsie, I'm exposing implementation.
+	const std::unordered_set<vert_t>& getMines() const;
+
+	const std::unordered_map<vert_t, punter_t>& getEdgesFrom(vert_t vertex) const;
+
 private:
-	struct VertexIncidence
-	{
-		bool is_mine;
-		std::unordered_map<vert_t, punter_t> edges;
-	};
 
 	std::vector<VertexIncidence> incidence_list;
+
 	std::unordered_set<vert_t> mines;
 
     vert_t playersNum;
@@ -43,6 +45,9 @@ private:
     punter_t punterId;
 
     int currentTurn;
+
+	// min distance between vertices
+	std::vector<std::vector<vert_t>> min_distance;
 };
 
 #endif //CW_ICFPC_2017_STATE_H

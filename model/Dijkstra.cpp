@@ -6,18 +6,21 @@
 // This code is slightly modified as edge weight is always 1 in our case
 
 
-#include <bits/stdc++.h>
+#include <queue>
+
 using namespace std;
-#define endl '\n'
-#define pii pair<int,int>
+
+#include "Dijkstra.h"
+
+#define pii pair<vert_t,vert_t>
 #define F first
 #define S second
 #define mp make_pair
 #define pb emplace_back
 
-bool vis[100001];
-int dis[100001];
-vector<pii> a[100001];
+//bool vis[100001]; //visited array
+//int dis[100001]; //storing shortest distance from source to every vertex
+//vector<int> adj[100001]; //Adjacency List. source vertex->destination vertex
 
 class prioritize {
 public: bool operator ()(pii &p1 , pii &p2) {
@@ -25,7 +28,13 @@ public: bool operator ()(pii &p1 , pii &p2) {
     }
 };
 
-int Dijkstra(int s, int n) {
+//s - source vertex
+//n - number of vertexes
+//vis - visited array
+//dis - storing shortest distance from source to every vertex
+//adj - Adjacency List. source vertex->destination vertex
+void Dijkstra(vert_t s, vert_t n, vector<vector<vert_t>> adj, vert_t dis[]) {
+    vector<bool> vis(n);
     for (int i = 0; i <= n; i++) {
         vis[i] = false;
         dis[i] = INT_MAX;
@@ -34,12 +43,12 @@ int Dijkstra(int s, int n) {
     pq.push(mp(s, dis[s] = 0));
     while (!pq.empty()) {
         pii cur = pq.top(); pq.pop();
-        int cv = cur.F, cw = cur.S;
+        vert_t cv = cur.F, cw = cur.S;
         if (vis[cv]) continue;
         vis[cv] = true;
-        for (pii x : a[cv]) {
-            if (!vis[x.F] && (cw + x.S) < dis[x.F]) {
-                pq.push(mp(x.F, dis[x.F] = cw + x.S));
+        for (vert_t x : adj[cv]) {
+            if (!vis[x] && (cw + 1) < dis[x]) {
+                pq.push(mp(x, dis[x] = cw + 1));
             }
         }
     }
