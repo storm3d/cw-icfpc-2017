@@ -33,7 +33,8 @@
     "test-only": "jest --coverage",
     "test:watch": "jest --watch",
     "build": "babel src/**/*.js -d dist",
-    "build:watch": "babel --watch src/**/*.js -d dist"
+    "build:watch": "babel --watch src/**/*.js -d dist",
+    "start" : "node dist/src/main.js"
   },
   "author": "Jakub Synowiec <jakub@jakubsynowiec.info> (https://jakubsynowiec.info)",
   "license": "MIT",

@@ -1,5 +1,7 @@
 /** @flow */
 
+console.log("Hello world!");
+
 function delayedHello(name: string, delay: number = 2000): Promise<string> {
   return new Promise((resolve) => setTimeout(() => resolve(`Hello, ${name}`), delay));
 }
@@ -8,5 +10,6 @@ function delayedHello(name: string, delay: number = 2000): Promise<string> {
 
 // $FlowFixMe: add type annotations to parameters
 export default async function greeter(name) { // eslint-disable-line flowtype/require-return-type
+	console.log("Hello world!");
   return delayedHello(name);
 };
