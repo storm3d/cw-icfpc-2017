@@ -5,10 +5,10 @@ include_directories(include)
 
 set(CMAKE_CXX_STANDARD 11)
 
-set(SOURCE_FILES main.cpp State.cpp State.h)
+set(SOURCE_FILES punter/punter.cpp model/State.cpp model/State.h)
 add_executable(punter ${SOURCE_FILES})
 
-set(SOURCE_FILES local_runner.cpp)
+set(SOURCE_FILES local_runner/local_runner.cpp)
 add_executable(local_runner ${SOURCE_FILES})
 
 set(SOURCE_FILES tests/tests-main.cpp)
