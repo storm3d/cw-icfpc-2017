@@ -5,6 +5,9 @@
 using json = nlohmann::json;
 
 int main( int argc, char* argv[] ) {
+
+    const clock_t begin_time = clock();
+
     std::cout << "Hello, World!" << std::endl;
 
     // create an empty structure (null)
@@ -48,6 +51,8 @@ int main( int argc, char* argv[] ) {
     };
 
     std::cout << j << std::endl;
+
+    std::cout << "Execution time: " << float( clock () - begin_time ) / CLOCKS_PER_SEC << " sec" << std::endl;
 
     return 0;
 }
