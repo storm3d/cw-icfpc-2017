@@ -14,7 +14,11 @@ GameState::GameState(std::istream &in) {
 	{
 		json &map = j["map"];
 		if(map["sites"].is_array()) {
+            incidence_list.resize(map["sites"].size());
 			for (auto& element : map["sites"]) {
+                int id = element["id"];
+
+                incidence_list[id] = VertexIncidence();
 				//std::cout << element << '\n';
 			}
         }
