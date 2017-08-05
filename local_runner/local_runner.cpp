@@ -38,6 +38,15 @@ std::string exec(const std::string & cmd, const std::string & input) {
     return result;
 }
 
+std::string wrap_json(const json& input)
+{
+    std::array<char, 12> buffer = {{}};
+    std::string input_string = input.dump();
+    sprintf(buffer.data(), "%u:", input_string.size());
+    std::string data(buffer.data());
+    return data + input_string;
+}
+
 std::string call_punter(const json& input_json)
 {
 #ifdef WINVER
@@ -45,11 +54,10 @@ std::string call_punter(const json& input_json)
 #else
     std::string cmd = "./punter";
 #endif // WINDOWS
-    std::array<char, 12> buffer = {{}};
-
-    sprintf(buffer.data(), "%u:", input_json.size());
-    std::string data(buffer.data());
-    return exec(cmd, data + input_json.dump());
+    json handshake;
+    handshake["you"] = "cw";
+    std::string message = wrap_json(handshake) + wrap_json(input_json);
+    return exec(cmd, message);
 }
 
 json startup(int player, int players_count, const std::string & filename)
@@ -83,7 +91,6 @@ int main() {
     std::cout << "Local runner for punters" << std::endl;
     json test = startup(1, 2, "../maps/sample.json");
     std::cout << pass_move(0) << claim_move(1, 2, 3) << std::endl;
-
 
     std::cout << call_punter(test) << std::endl;
     return 0;

@@ -10,8 +10,17 @@ int main( int argc, char* argv[] ) {
     // skip message prefix
     // TODO: proper reading length of JSON
     char ch;
-    while (std::cin.peek() != '{')
-        std::cin.get(ch);
+    unsigned long len;
+    std::cin>>len>>ch;
+    for(int i=len; i-->0;) std::cin>>ch; // skip handshake
+    std::cin>>len>>ch;
+
+    // send stub handshake
+    // TODO: proper handshake
+    nlohmann::json j;
+    j["me"] = "cw";
+    std::string handshake = j.dump();
+    std::cout<<handshake.size()<<":"<<handshake;
 
     OfflineProtocol offlineProtocol;
 

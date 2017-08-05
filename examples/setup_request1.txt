@@ -1,4 +1,4 @@
-120:{"punter":0,
+12:{"you":"cw"}120:{"punter":0,
 "punters":2,
 "map":{"sites":[{"id":4},{"id":1},{"id":3},{"id":6},{"id":5},{"id":0},{"id":7},{"id":2}],
 "rivers":[{"source":3,"target":4},{"source":0,"target":1},{"source":2,"target":3},
