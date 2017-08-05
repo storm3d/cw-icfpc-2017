@@ -15,9 +15,9 @@ set(SOURCE_FILES
 		model/Empire.cpp
 		model/Empire.h)
 
-if(CMAKE_COMPILER_IS_GNUCC)
+if (MINGW)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libgcc -static-libstdc++ -Wl,-Bstatic -lstdc++ -lpthread -Wl,-Bdynamic")
-endif(CMAKE_COMPILER_IS_GNUCC)
+endif (MINGW)
 
 add_executable(punter ${SOURCE_FILES})
 target_link_libraries(punter PRIVATE)

@@ -7,7 +7,7 @@ int main( int argc, char* argv[] ) {
     const clock_t begin_time = clock();
 
     GameState state(std::cin);
-    state.Serialize(std::cout);
+    state.serialize(std::cout);
 
     std::cout <<  std::endl << "Execution time: "
               << float( clock () - begin_time ) / CLOCKS_PER_SEC
