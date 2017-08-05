@@ -116,7 +116,8 @@ public:
         state->mines = mines;
         state->incidence_list = incidence_list;
 
-        state->complementEdges();
+        // NO NEED TO DO THIS, we do it on deserialization
+        //state->complementEdges();
 
         return std::unique_ptr<GameState>(state);
     }

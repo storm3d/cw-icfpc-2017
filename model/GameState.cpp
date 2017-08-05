@@ -234,10 +234,12 @@ void GameState::complementEdges() {
     vert_t num = incidence_list.size();
     for (vert_t i = 0; i < num; i++) {
         for (auto& vi : incidence_list[i]) {
-            vert_t puntor = vi.second;
+            punter_t puntor = vi.second;
 
             if (vi.first >= incidence_list.size())
                 incidence_list.resize(vi.first + 1);
+
+            //cerr << "comp " << incidence_list[vi.first][i] << " " << puntor << endl;
 
             incidence_list[vi.first][i] = puntor;
         }
