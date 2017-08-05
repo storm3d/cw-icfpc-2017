@@ -50,6 +50,8 @@ public:
 
     const std::unordered_map<vert_t, std::vector<vert_t>> &getMinDistances() const;
 
+    void complementEdges();
+
     void initMinDistances();
 
 private:
@@ -101,6 +103,8 @@ public:
         state->punters_num = punters_num;
         state->mines = mines;
         state->incidence_list = incidence_list;
+
+        state->complementEdges();
 
         return std::unique_ptr<GameState>(state);
     }

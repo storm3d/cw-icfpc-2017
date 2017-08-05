@@ -16,10 +16,10 @@ static GameState deserializeState()
     std::istringstream iss ("{\"punter\":0,\n"
                                     "\"punters\":2,\n"
                                     "\"map\":{\"sites\":[{\"id\":4},{\"id\":1},{\"id\":3},{\"id\":6},{\"id\":5},{\"id\":0},{\"id\":7},{\"id\":2}],\n"
-                                    "\"rivers\":[{\"source\":3,\"target\":4},{\"source\":0,\"target\":1},{\"source\":2,\"target\":3},\n"
-                                    "{\"source\":1,\"target\":3},{\"source\":5,\"target\":6},{\"source\":4,\"target\":5},\n"
-                                    "{\"source\":3,\"target\":5},{\"source\":6,\"target\":7},{\"source\":5,\"target\":7},\n"
-                                    "{\"source\":1,\"target\":7},{\"source\":0,\"target\":7},{\"source\":1,\"target\":2}],\n"
+                                    "\"rivers\":[{\"source\":3,\"target\":4,\"punter\":0},{\"source\":0,\"target\":1,\"punter\":0},{\"source\":2,\"target\":3,\"punter\":0},\n"
+                                    "{\"source\":1,\"target\":3,\"punter\":0},{\"source\":5,\"target\":6,\"punter\":0},{\"source\":4,\"target\":5,\"punter\":0},\n"
+                                    "{\"source\":3,\"target\":5,\"punter\":0},{\"source\":6,\"target\":7,\"punter\":0},{\"source\":5,\"target\":7,\"punter\":0},\n"
+                                    "{\"source\":1,\"target\":7,\"punter\":0},{\"source\":0,\"target\":7,\"punter\":0},{\"source\":1,\"target\":2,\"punter\":0}],\n"
                                     "\"mines\":[1,5]}}");
 
     json j;
@@ -86,5 +86,46 @@ TEST_CASE("GameState serialization contains river punters") {
     REQUIRE(state.getEdgesFrom(0).at(1) == PUNTER_1);
     REQUIRE(state.getEdgesFrom(0).at(2) == PUNTER_2);
 }
+
+TEST_CASE("Game state has complemented adjucency list") {
+    // site -- site -- site
+    GameStateBuilder builder;
+    builder.incidence_list_ref().resize(3);
+    builder.incidence_list_ref()[0][1] = 0;
+    builder.incidence_list_ref()[1][2] = 0;
+
+    auto state = builder.build();
+    REQUIRE(state->getEdgesFrom(0).size() == 1);
+    REQUIRE(state->getEdgesFrom(0).at(1) == 0);
+
+    REQUIRE(state->getEdgesFrom(1).size() == 2);
+    REQUIRE(state->getEdgesFrom(1).at(0) == 0);
+    REQUIRE(state->getEdgesFrom(1).at(2) == 0);
+
+    REQUIRE(state->getEdgesFrom(2).size() == 1);
+    REQUIRE(state->getEdgesFrom(2).at(1) == 0);
+
+}
+
+// TODO Fix getMinDistances to make this test pass
+//TEST_CASE("Calculate min distances to mines") {
+//    // mine -- site -- site
+//    GameStateBuilder builder;
+//    builder.mines_ref().insert(0);
+//    builder.incidence_list_ref().resize(3);
+//    builder.incidence_list_ref()[0][1] = 0;
+//    builder.incidence_list_ref()[1][0] = 0;
+//    builder.incidence_list_ref()[1][2] = 0;
+//    builder.incidence_list_ref()[2][1] = 0;
+//
+//    auto state = builder.build();
+//
+//    state->initMinDistances();
+//
+//    REQUIRE(state->getMinDistances().size() == 1);
+//    REQUIRE(state->getMinDistances().at(0)[0] == 0);
+//    REQUIRE(state->getMinDistances().at(0)[1] == 1);
+//    REQUIRE(state->getMinDistances().at(0)[2] == 2);
+//}
 
 #pragma clang diagnostic pop

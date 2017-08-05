@@ -188,7 +188,21 @@ const std::unordered_map<vert_t, std::vector<vert_t>> &GameState::getMinDistance
     return min_distances;
 }
 
-// TODO: testsssss
+// complement directional edges to unidirectional
+void GameState::complementEdges() {
+    vert_t num = incidence_list.size();
+    for (vert_t i = 0; i < num; i++) {
+        for (auto& vi : incidence_list[i]) {
+            vert_t puntor = vi.second;
+
+            if (vi.first >= incidence_list.size())
+                incidence_list.resize(vi.first + 1);
+
+            incidence_list[vi.first][i] = puntor;
+        }
+    }
+}
+
 void GameState::initMinDistances()
 {
     vert_t vertices_num = incidence_list.size();
