@@ -1,6 +1,7 @@
 #include <cassert>
 #include "GameState.h"
 #include "json.hpp"
+#include "Dijkstra.h"
 
 // for convenience
 using json = nlohmann::json;
@@ -128,4 +129,22 @@ const std::unordered_map<vert_t, punter_t> &GameState::getEdgesFrom(vert_t verte
 
 const std::unordered_set<vert_t>& GameState::getMines() const {
 	return mines;
+}
+
+// TODO: testsssss
+void GameState::initMinDistances()
+{
+	vert_t vertices_num = incidence_list.size();
+	vert_t mines_num = mines.size();
+
+	for (vert_t i : mines) {
+		std::vector<std::vector<vert_t>> adj(getEdgesFrom(i).size());
+
+		for (std::pair<vert_t, punter_t> v : getEdgesFrom(i)) {
+			adj[i].push_back(v.first);
+		}
+		std::vector<vert_t> vertext_distances(vertices_num);
+		Dijkstra(i, adj, vertext_distances);
+		min_distances[i] = vertext_distances;
+	}
 }
