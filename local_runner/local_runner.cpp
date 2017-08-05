@@ -69,7 +69,13 @@ int main() {
     std::cout << "Local runner for punters" << std::endl;
     json test = startup(1, 2, "../maps/sample.json");
     std::cout << pass_move(0) << claim_move(1, 2, 3) << std::endl;
+    
+#ifdef WINVER
+    std::string cmd = "cmd /c punter.exe";
+#else
+    std::string cmd = "./punter";
+#endif // WINDOWS
 
-    std::cout << exec("cmd /c punter.exe", test.dump()) << std::endl;
+    std::cout << exec(cmd, test.dump()) << std::endl;
     return 0;
 }
