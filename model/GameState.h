@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <iostream>
 #include <cstdint>
+#include <memory>
 
 typedef uint64_t vert_t;
 typedef uint64_t punter_t;
