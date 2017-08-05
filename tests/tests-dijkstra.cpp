@@ -4,7 +4,7 @@
 
 using namespace std;
 
-#include "../include/catch.hpp"
+#include <catch.hpp>
 #include "../model/Dijkstra.h"
 
 
