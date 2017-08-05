@@ -15,8 +15,6 @@ typedef uint64_t punter_t;
 
 typedef std::unordered_map<vert_t, punter_t> VertexIncidence;
 
-using json = nlohmann::json;
-
 class GameState {
 public:
     GameState();
@@ -25,7 +23,7 @@ public:
 
     void serialize(std::ostream &out) const;
 
-    void deserialize(json& state);
+    void deserialize(nlohmann::json& state);
 
     vert_t getSitesNum() const;
 
