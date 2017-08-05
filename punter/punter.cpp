@@ -1,6 +1,7 @@
 #include <iostream>
 #include "json.hpp"
 #include "../model/GameState.h"
+#include "OfflineProtocol.h"
 
 int main( int argc, char* argv[] ) {
 
@@ -11,11 +12,12 @@ int main( int argc, char* argv[] ) {
     char ch;
     while (std::cin.peek() != '{')
         std::cin.get(ch);
-    
-    GameState state(std::cin);
-    state.serialize(std::cout);
 
-    std::cout <<  std::endl << "Execution time: "
+    OfflineProtocol offlineProtocol;
+
+    offlineProtocol.handleRequest(std::cin, std::cout);
+
+    std::cerr <<  std::endl << "Execution time: "
               << float( clock () - begin_time ) / CLOCKS_PER_SEC
               << " sec" << std::endl;
 

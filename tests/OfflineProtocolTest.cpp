@@ -1,3 +1,4 @@
+
 #include <catch.hpp>
 #include <json.hpp>
 
@@ -5,13 +6,14 @@
 #include <string>
 
 #include "../model/GameState.h"
+#include "../punter/OfflineProtocol.h"
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "ClangTidyInspection"
 
 using nlohmann::json;
 
-static GameState getSampleGameState()
+static GameState getSampleGameStateFromSetupRequest()
 {
     std::istringstream iss ("{\"punter\":0,\n"
                                     "\"punters\":2,\n"
@@ -21,35 +23,40 @@ static GameState getSampleGameState()
                                     "{\"source\":3,\"target\":5},{\"source\":6,\"target\":7},{\"source\":5,\"target\":7},\n"
                                     "{\"source\":1,\"target\":7},{\"source\":0,\"target\":7},{\"source\":1,\"target\":2}],\n"
                                     "\"mines\":[1,5]}}");
-    GameState state(iss);
-    return state;
+
+    json request;
+    iss >> request;
+
+    OfflineProtocol protocol;
+
+    return *protocol.getStateFromSetupRequest(request).get();
 }
 
-TEST_CASE( "GameState.getPuntersNum() should return correct value", "[GameState]" ) {
-    REQUIRE(getSampleGameState().getPuntersNum() == 2 );
+TEST_CASE( "Setup Request GameState.getPuntersNum() should return correct value", "[GameState]" ) {
+    REQUIRE(getSampleGameStateFromSetupRequest().getPuntersNum() == 2 );
 }
 
-TEST_CASE( "GameState.getSitesNum() should return correct value", "[GameState]" ) {
-    REQUIRE(getSampleGameState().getSitesNum() == 8 );
+TEST_CASE( "Setup Request GameState.getSitesNum() should return correct value", "[GameState]" ) {
+    REQUIRE(getSampleGameStateFromSetupRequest().getSitesNum() == 8 );
 }
 
-TEST_CASE( "GameState.getPunterId() should return correct value", "[GameState]" ) {
-    REQUIRE(getSampleGameState().getPunterId() == 0 );
+TEST_CASE( "Setup Request GameState.getPunterId() should return correct value", "[GameState]" ) {
+    REQUIRE(getSampleGameStateFromSetupRequest().getPunterId() == 0 );
 }
 
-TEST_CASE( "GameState.isEdge() should return correct value", "[GameState]" ) {
-    REQUIRE(getSampleGameState().isEdge(3, 4) );
-    REQUIRE( !getSampleGameState().isEdge(3, 7) );
+TEST_CASE( "Setup Request GameState.isEdge() should return correct value", "[GameState]" ) {
+    REQUIRE(getSampleGameStateFromSetupRequest().isEdge(3, 4) );
+    REQUIRE( !getSampleGameStateFromSetupRequest().isEdge(3, 7) );
 }
 
-TEST_CASE( "GameState.isMine() should return correct value", "[GameState]" ) {
-    REQUIRE(getSampleGameState().isMine(5) );
-    REQUIRE( !getSampleGameState().isMine(2) );
+TEST_CASE( "Setup Request GameState.isMine() should return correct value", "[GameState]" ) {
+    REQUIRE(getSampleGameStateFromSetupRequest().isMine(5) );
+    REQUIRE( !getSampleGameStateFromSetupRequest().isMine(2) );
 }
 
-TEST_CASE( "GameState serialization" ) {
+TEST_CASE( "Setup Request GameState serialization" ) {
     std::ostringstream os;
-    getSampleGameState().serialize(os);
+    getSampleGameStateFromSetupRequest().serialize(os);
 
     std::string s = os.str();
 
@@ -60,3 +67,4 @@ TEST_CASE( "GameState serialization" ) {
 }
 
 #pragma clang diagnostic pop
+
