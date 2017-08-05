@@ -6,6 +6,12 @@ int main( int argc, char* argv[] ) {
 
     const clock_t begin_time = clock();
 
+    // skip message prefix
+    // TODO: proper reading length of JSON
+    char ch;
+    while (std::cin.peek() != '{')
+        std::cin.get(ch);
+    
     GameState state(std::cin);
     state.serialize(std::cout);
 
