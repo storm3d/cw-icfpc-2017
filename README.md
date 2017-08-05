@@ -12,4 +12,4 @@
 1. Устанавливаем Lamduct в виртуалке:
     ```opam pin add lambda-duct https://github.com/icfpcontest2017/lambda-duct.git```
 2. ```cd``` в папку с бинарником punter
-3. ```lamduct punter --log-level 3 --game-port 9998```
+3. ```lamduct punter --log-level 3 --game-port 9001```
