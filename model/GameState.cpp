@@ -23,6 +23,23 @@ GameState::GameState(std::istream &in) {
 				//std::cout << element << '\n';
 			}
         }
+
+        if(map["rivers"].is_array()) {
+            for (auto& element : map["rivers"]) {
+                vert_t source = element["source"];
+                vert_t target = element["target"];
+
+                incidence_list[source][target] = 0;
+                incidence_list[target][source] = 0;
+            }
+        }
+
+        if(map["mines"].is_array()) {
+            for (auto &element : map["mines"]) {
+                vert_t id = element;
+                mines.insert(id);
+            }
+        }
     }
 }
 

@@ -30,3 +30,13 @@ TEST_CASE( "GameState.getSitesNum() should return correct value", "[GameState]" 
 TEST_CASE( "GameState.getPunterId() should return correct value", "[GameState]" ) {
     REQUIRE( getSampleGameState().getPunterId() == 0 );
 }
+
+TEST_CASE( "GameState.isEdge() should return correct value", "[GameState]" ) {
+    REQUIRE( getSampleGameState().isEdge(3, 4) == true );
+    REQUIRE( getSampleGameState().isEdge(3, 7) == false );
+}
+
+TEST_CASE( "GameState.isMine() should return correct value", "[GameState]" ) {
+    REQUIRE( getSampleGameState().isMine(5) == true );
+    REQUIRE( getSampleGameState().isMine(2) == false );
+}
