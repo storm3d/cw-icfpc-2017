@@ -34,11 +34,14 @@ void GameState::serialize(std::ostream &out) const {
     for (vert_t v1 = 0; v1 < incidence_list.size(); v1++)
     {
         for (auto& vi : incidence_list[v1]) {
+            if(v1 >= vi.first)
+                continue;
+
             if (comma) {
                 out << ',';
             }
             comma = true;
-            out << "{\"source\":" << v1 << ",\"target\":" << vi.first << ",\"punter\":" << vi.second << '}';
+            out << "{\"s\":" << v1 << ",\"t\":" << vi.first << ",\"p\":" << vi.second << '}';
         }
     }
     out     << "], "; // rivers
@@ -87,9 +90,9 @@ void GameState::deserialize(json& state) {
 
         if(map["rivers"].is_array()) {
             for (auto& element : map["rivers"]) {
-                vert_t source = element["source"];
-                vert_t target = element["target"];
-                vert_t punter = element["punter"];
+                vert_t source = element["s"];
+                vert_t target = element["t"];
+                vert_t punter = element["p"];
 
                 incidence_list[source][target] = punter;
                 incidence_list[target][source] = punter;

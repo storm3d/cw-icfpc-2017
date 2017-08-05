@@ -26,10 +26,9 @@ void OfflineProtocol::handleRequest(std::istream &in, std::ostream &out) {
         std::unique_ptr<GameState> state = extractStateFromMoveRequest(request);
         std::vector<Move> moves = extractMovesFromMoveRequest(request);
 
-        /*
         for (auto& move : moves) {
             state->claimEdge(move.from, move.to, move.punter_id);
-        }*/
+        }
 
         // {"claim" : {"punter" : PunterId, "source" : SiteId, "target" : SiteId}}
         // {"state" : state}
@@ -63,8 +62,8 @@ std::unique_ptr<GameState> OfflineProtocol::extractStateFromSetupRequest(json &s
                 vert_t source = element["source"];
                 vert_t target = element["target"];
 
-                builder.incidence_list_ref()[source][target] = 0;
-                builder.incidence_list_ref()[target][source] = 0;
+                builder.incidence_list_ref()[source][target] = -1;
+                builder.incidence_list_ref()[target][source] = -1;
             }
         }
 

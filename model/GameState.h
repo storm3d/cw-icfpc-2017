@@ -11,7 +11,7 @@
 #include <json.hpp>
 
 typedef uint64_t vert_t;
-typedef uint64_t punter_t;
+typedef int64_t punter_t;
 
 typedef std::unordered_map<vert_t, punter_t> VertexIncidence;
 
