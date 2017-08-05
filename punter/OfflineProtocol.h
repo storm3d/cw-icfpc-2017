@@ -32,6 +32,8 @@ public:
 
     std::vector<Move> extractMovesFromMoveRequest(json &move_request);
 
+    std::vector<int> extractScoresFromStopRequest(json &stop_request);
+
     void writeSetupResponse(std::ostream &out, GameState *state);
 
     void writeMoveResponse(std::ostream &out, GameState *state);

@@ -60,7 +60,7 @@ public:
 
     const std::unordered_map<vert_t, std::vector<vert_t>> &getMinDistances() const;
 
-    void complementEdges();
+    //void complementEdges();
 
     void initMinDistances();
 

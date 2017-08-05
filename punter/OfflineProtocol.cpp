@@ -4,9 +4,9 @@
 void OfflineProtocol::handleRequest(std::istream &in, std::ostream &out) {
     json request;
 
-    std::cerr << "Parsing state Json" << std::endl;
+    //std::cerr << "Parsing state Json" << std::endl;
     in >> request;
-    std::cerr << "Parsed state Json" << std::endl;
+    //std::cerr << "Parsed state Json" << std::endl;
 
     if (request.find("punter") != request.end()) {
         // setup request
@@ -22,7 +22,6 @@ void OfflineProtocol::handleRequest(std::istream &in, std::ostream &out) {
 
         //out << "{\"pass\":{\"punter\":" << 0 << "},\"state\":0}";
 
-
         std::unique_ptr<GameState> state = extractStateFromMoveRequest(request);
         std::vector<Move> moves = extractMovesFromMoveRequest(request);
 
@@ -30,10 +29,19 @@ void OfflineProtocol::handleRequest(std::istream &in, std::ostream &out) {
             state->claimEdge(move.from, move.to, move.punter_id);
         }
 
+
+
         // {"claim" : {"punter" : PunterId, "source" : SiteId, "target" : SiteId}}
         // {"state" : state}
         writeMoveResponse(out, state.get());
 
+    } else if (request.find("stop") != request.end()) {
+        // stop request
+        std::cerr << "Handling Stop request" << std::endl;
+
+        std::unique_ptr<GameState> state = extractStateFromMoveRequest(request);
+        std::vector<int> scores = extractScoresFromStopRequest(request);
+        std::cerr << "OUR SCORE: " << scores[state->getPunterId()] << std::endl;
     }
 
 }
@@ -102,6 +110,19 @@ std::vector<OfflineProtocol::Move> OfflineProtocol::extractMovesFromMoveRequest(
     return moves;
 }
 
+std::vector<int> OfflineProtocol::extractScoresFromStopRequest(json &stop_request) {
+    std::vector<int> scores;
+
+    json &elements = stop_request["stop"]["scores"];
+    if (elements.is_array()) {
+        scores.resize(elements.size());
+        for (auto &score : elements) {
+            scores[score["punter"]] = score["score"];
+        }
+    }
+    return scores;
+}
+
 void OfflineProtocol::writeSetupResponse(std::ostream &out, GameState *state) {
     out << "{\"ready\":" << state->getPunterId() << ",\"state\":";
     state->serialize(out);
@@ -109,10 +130,38 @@ void OfflineProtocol::writeSetupResponse(std::ostream &out, GameState *state) {
 }
 
 void OfflineProtocol::writeMoveResponse(std::ostream &out, GameState *state) {
-    // {"claim" : {"punter" : PunterId, "source" : SiteId, "target" : SiteId}}
+
+    // rough algo
+
+    // occupy mines first
+    for (auto& mine : state->getMines()) {
+        for (auto& edge : state->getEdgesFrom(mine)) {
+            if(edge.second == -1) {
+
+                out << "{\"claim\":{\"punter\":" << state->getPunterId() << ", \"source\":" << mine;
+                out << ", \"target\":" << edge.first;
+                out << "}, \"state\": ";
+                state->serialize(out);
+                out << "}";
+                return;
+            }}
+    }
+
+    // try to occupy sites
+    for (auto site = 0; site < state->getSitesNum(); site++) {
+        for (auto& edge : state->getEdgesFrom(site)) {
+            if(edge.second == -1) {
+
+                out << "{\"claim\":{\"punter\":" << state->getPunterId() << ", \"source\":" << site;
+                out << ", \"target\":" << edge.first;
+                out << "}, \"state\": ";
+                state->serialize(out);
+                out << "}";
+                return;
+            }}
+    }
+
     out << "{\"pass\":{\"punter\":" << state->getPunterId();
-//    out << "{\"claim\":{\"punter\":" << state->getPunterId();
-//    out << ",\"source\":" << ",\"target\":";
     out << "}, \"state\": ";
     state->serialize(out);
     out << "}";
