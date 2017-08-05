@@ -8,14 +8,30 @@ void OfflineProtocol::handleRequest(std::istream &in, std::ostream &out) {
     if (request.find("punter") != request.end()) {
         // setup request
         std::cerr << "Handling Setup request" << std::endl;
-        std::unique_ptr<GameState> state = getStateFromSetupRequest(request);
+        std::unique_ptr<GameState> state = extractStateFromSetupRequest(request);
 
         //{"ready" : p, "state" : state}
         writeSetupResponse(out, state.get());
+
+    } else if (request.find("move") != request.end()) {
+        // move request
+        std::cerr << "Handling Move request" << std::endl;
+        std::unique_ptr<GameState> state = extractStateFromSetupRequest(request);
+        std::vector<Move> moves = extractMovesFromMoveRequest(request);
+
+        for (auto& move : moves) {
+            state->claimEdge(move.from, move.to, move.punter_id);
+        }
+
+        // {"claim" : {"punter" : PunterId, "source" : SiteId, "target" : SiteId}}
+        // {"state" : state}
+        writeMoveResponse(out, state.get());
+
     }
+
 }
 
-std::unique_ptr<GameState> OfflineProtocol::getStateFromSetupRequest(json &setup_request) {
+std::unique_ptr<GameState> OfflineProtocol::extractStateFromSetupRequest(json &setup_request) {
 
     GameStateBuilder builder;
 
@@ -54,8 +70,57 @@ std::unique_ptr<GameState> OfflineProtocol::getStateFromSetupRequest(json &setup
     return builder.build();
 }
 
-void OfflineProtocol::writeSetupResponse(std::ostream &out, GameState* state) {
+std::unique_ptr<GameState> OfflineProtocol::extractStateFromMoveRequest(json &move_request)
+{
+    auto* state = new GameState();
+
+    state->deserialize(move_request["state"]);
+
+    return std::unique_ptr<GameState>(state);
+}
+
+std::vector<OfflineProtocol::Move> OfflineProtocol::extractMovesFromMoveRequest(json &move_request) {
+    std::vector<OfflineProtocol::Move> moves;
+
+    json &elements = move_request["move"]["moves"];
+    if (elements.is_array()) {
+        for (auto &move : elements) {
+            if (move.find("claim") != move.end()) {
+                OfflineProtocol::Move m(move["claim"]["punter"],
+                                        move["claim"]["source"], move["claim"]["target"]);
+                moves.push_back(m);
+            }
+        }
+    }
+    return moves;
+}
+
+void OfflineProtocol::writeSetupResponse(std::ostream &out, GameState *state) {
     out << "{\"ready\":" << state->getPunterId() << ",\"state\":";
     state->serialize(out);
     out << "}";
+}
+
+void OfflineProtocol::writeMoveResponse(std::ostream &out, GameState *state) {
+    // {"claim" : {"punter" : PunterId, "source" : SiteId, "target" : SiteId}}
+    out << "{\"pass\":{\"punter\":" << state->getPunterId();
+//    out << "{\"claim\":{\"punter\":" << state->getPunterId();
+//    out << ",\"source\":" << ",\"target\":";
+    out << "}}" << std::endl;
+    out << "{\"state\":";
+    state->serialize(out);
+    out << "}";
+}
+
+OfflineProtocol::Move::Move(vert_t punter_id, vert_t from, vert_t to) {
+    this->punter_id = punter_id;
+    this->from = from;
+    this->to = to;
+}
+
+
+bool operator==(const OfflineProtocol::Move &lhs, const OfflineProtocol::Move &rhs) {
+    return lhs.punter_id == rhs.punter_id
+           && ((lhs.from == rhs.from && lhs.to == rhs.to)
+               || (lhs.to == rhs.from && lhs.from == rhs.to));
 }

@@ -8,10 +8,14 @@
 #include <cstdint>
 #include <memory>
 
+#include <json.hpp>
+
 typedef uint64_t vert_t;
 typedef uint64_t punter_t;
 
 typedef std::unordered_map<vert_t, punter_t> VertexIncidence;
+
+using json = nlohmann::json;
 
 class GameState {
 public:
@@ -20,6 +24,8 @@ public:
     explicit GameState(std::istream &in);
 
     void serialize(std::ostream &out) const;
+
+    void deserialize(json& state);
 
     vert_t getSitesNum() const;
 

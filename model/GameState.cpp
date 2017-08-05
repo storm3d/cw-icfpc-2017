@@ -99,6 +99,42 @@ void GameState::serialize(std::ostream &out) const {
     out << "}\n"; // state
 }
 
+void GameState::deserialize(json& state) {
+    punters_num = state["punters"];
+    punter_id = state["punter"];
+
+    if(state["map"].is_object())
+    {
+        json &map = state["map"];
+        if(map["sites"].is_array()) {
+            incidence_list.resize(map["sites"].size());
+            for (auto& element : map["sites"]) {
+                int id = element["id"];
+
+                incidence_list[id] = VertexIncidence();
+                //std::cout << element << '\n';
+            }
+        }
+
+        if(map["rivers"].is_array()) {
+            for (auto& element : map["rivers"]) {
+                vert_t source = element["source"];
+                vert_t target = element["target"];
+
+                incidence_list[source][target] = 0;
+                incidence_list[target][source] = 0;
+            }
+        }
+
+        if(map["mines"].is_array()) {
+            for (auto &element : map["mines"]) {
+                vert_t id = element;
+                mines.insert(id);
+            }
+        }
+    }
+}
+
 vert_t GameState::getPuntersNum() const {
     return punters_num;
 }
