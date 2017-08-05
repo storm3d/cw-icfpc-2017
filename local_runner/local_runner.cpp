@@ -1,13 +1,6 @@
 #include <iostream>
 #include <fstream>
-
-
-#include <cstdio>
 #include <memory>
-#include <stdexcept>
-#include <string>
-#include <array>
-
 #include <json.hpp>
 
 using json = nlohmann::json;
@@ -21,11 +14,23 @@ json read_file(const std::string & filename)
     return res;
 }
 
-std::string exec(const char* cmd) {
+std::string exec(const std::string & cmd, const std::string & input) {
     std::array<char, 128> buffer;
     std::string result;
-    std::shared_ptr<FILE> pipe(popen(cmd, "r"), pclose);
+
+    // write input to file
+    // TODO: true tempfile
+    auto temp = "stdin.file";
+    auto f = fopen(temp, "w");
+    fputs(input.c_str(),f);
+    fclose(f);
+
+    // retarget input stream to input file
+    freopen(temp, "r", stdin);
+
+    std::shared_ptr<FILE> pipe(popen(cmd.c_str(), "r"), pclose);
     if (!pipe) throw std::runtime_error("popen() failed!");
+
     while (!feof(pipe.get())) {
         if (fgets(buffer.data(), 128, pipe.get()) != nullptr)
             result += buffer.data();
@@ -33,13 +38,13 @@ std::string exec(const char* cmd) {
     return result;
 }
 
-void startup(int player, int players_count, const std::string & filename)
+json startup(int player, int players_count, const std::string & filename)
 {
     json j;
     j["punter"] = player;
     j["punters"] = players_count;
     j["map"] = read_file(filename);
-    std::cout<< j << std::endl;
+    return j;
 }
 
 json pass_move(int player)
@@ -62,9 +67,9 @@ json claim_move(int player, int src, int dst)
 
 int main() {
     std::cout << "Local runner for punters" << std::endl;
-    //startup(0, 2);
-    startup(1, 2, "../maps/sample.json");
+    json test = startup(1, 2, "../maps/sample.json");
     std::cout << pass_move(0) << claim_move(1, 2, 3) << std::endl;
-    std::cout << exec("cmd /c punter.exe") << std::endl;
+
+    std::cout << exec("cmd /c punter.exe", test.dump()) << std::endl;
     return 0;
 }
