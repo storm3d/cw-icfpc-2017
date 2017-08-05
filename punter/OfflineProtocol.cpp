@@ -20,20 +20,21 @@ void OfflineProtocol::handleRequest(std::istream &in, std::ostream &out) {
         // move request
         std::cerr << "Handling Move request" << std::endl;
 
-        out << "{\"pass\":{\"punter\":" << 0 << "},\"state\":0}";
+        //out << "{\"pass\":{\"punter\":" << 0 << "},\"state\":0}";
 
-        /*
-        std::unique_ptr<GameState> state = extractStateFromSetupRequest(request);
+
+        std::unique_ptr<GameState> state = extractStateFromMoveRequest(request);
         std::vector<Move> moves = extractMovesFromMoveRequest(request);
 
+        /*
         for (auto& move : moves) {
             state->claimEdge(move.from, move.to, move.punter_id);
-        }
+        }*/
 
         // {"claim" : {"punter" : PunterId, "source" : SiteId, "target" : SiteId}}
         // {"state" : state}
         writeMoveResponse(out, state.get());
-*/
+
     }
 
 }
@@ -113,9 +114,8 @@ void OfflineProtocol::writeMoveResponse(std::ostream &out, GameState *state) {
     out << "{\"pass\":{\"punter\":" << state->getPunterId();
 //    out << "{\"claim\":{\"punter\":" << state->getPunterId();
 //    out << ",\"source\":" << ",\"target\":";
-    out << "}}";
-    out << "{\"state\":";
-    //state->serialize(out);
+    out << "}, \"state\": ";
+    state->serialize(out);
     out << "}";
 }
 

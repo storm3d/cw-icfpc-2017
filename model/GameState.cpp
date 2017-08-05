@@ -6,6 +6,7 @@
 
 // for convenience
 using json = nlohmann::json;
+using namespace std;
 
 GameState::GameState() {
 }
@@ -66,6 +67,8 @@ void GameState::deserialize(std::istream &in) {
 }
 
 void GameState::deserialize(json& state) {
+    cerr << "GameState::deserialize" << endl;
+
     punters_num = state["punters"];
     punter_id = state["punter"];
 

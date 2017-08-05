@@ -22,6 +22,8 @@ string readJson()
     string jsonStr(jsonLength, ' ');
     cin.read(&jsonStr[0], jsonLength);
 
+    cerr << jsonStr << endl;
+
     return jsonStr;
 }
 
