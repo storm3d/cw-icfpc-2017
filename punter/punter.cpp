@@ -5,6 +5,13 @@
 
 int main( int argc, char* argv[] ) {
 
+    // send stub handshake
+    // TODO: proper handshake
+    nlohmann::json j;
+    j["me"] = "cw";
+    std::string handshake = j.dump();
+    std::cout<<handshake.size()<<":"<<handshake;
+
     const clock_t begin_time = clock();
 
     // skip message prefix
@@ -14,13 +21,6 @@ int main( int argc, char* argv[] ) {
     std::cin>>len>>ch;
     for(int i=len; i-->0;) std::cin>>ch; // skip handshake
     std::cin>>len>>ch;
-
-    // send stub handshake
-    // TODO: proper handshake
-    nlohmann::json j;
-    j["me"] = "cw";
-    std::string handshake = j.dump();
-    std::cout<<handshake.size()<<":"<<handshake;
 
     OfflineProtocol offlineProtocol;
 
