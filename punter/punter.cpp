@@ -31,6 +31,13 @@ int main( int argc, char* argv[] ) {
 
     const clock_t begin_time = clock();
 
+    if(argc > 2 && !strcmp(argv[1], "-f")) {
+        std::ifstream ifs(argv[2]);
+        OfflineProtocol offlineProtocol;
+        offlineProtocol.handleRequest(ifs, cout);
+        return 0;
+    }
+
     //std::ofstream ofs ("punter.log", std::ofstream::out);
     //ofs << "Log started" << std::endl;
 
