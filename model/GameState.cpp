@@ -217,6 +217,10 @@ const std::unordered_set<vert_t>& GameState::getMines() const {
     return mines;
 }
 
+const std::unordered_map<vert_t, std::vector<vert_t>> &GameState::getMinDistances() const {
+    return min_distances;
+}
+
 // TODO: testsssss
 void GameState::initMinDistances()
 {

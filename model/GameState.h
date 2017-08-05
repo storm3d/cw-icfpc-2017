@@ -50,6 +50,8 @@ public:
 
     const std::unordered_map<vert_t, punter_t> &getEdgesFrom(vert_t vertex) const;
 
+    const std::unordered_map<vert_t, std::vector<vert_t>> &getMinDistances() const;
+
     void initMinDistances();
 
 private:
