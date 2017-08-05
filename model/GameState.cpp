@@ -56,7 +56,7 @@ void GameState::serialize(std::ostream &out) const {
 
 
     out << "}"; // map
-    out << "}\n"; // state
+    out << "}"; // state
 }
 
 void GameState::deserialize(std::istream &in) {
