@@ -106,7 +106,7 @@ void OfflineProtocol::writeMoveResponse(std::ostream &out, GameState *state) {
     out << "{\"pass\":{\"punter\":" << state->getPunterId();
 //    out << "{\"claim\":{\"punter\":" << state->getPunterId();
 //    out << ",\"source\":" << ",\"target\":";
-    out << "}}" << std::endl;
+    out << "}}";
     out << "{\"state\":";
     state->serialize(out);
     out << "}";

@@ -19,9 +19,9 @@ class GameState {
 public:
     GameState();
 
-    explicit GameState(std::istream &in);
-
     void serialize(std::ostream &out) const;
+
+    void deserialize(std::istream &in);
 
     void deserialize(nlohmann::json& state);
 
@@ -50,6 +50,8 @@ public:
 
     const std::unordered_map<vert_t, std::vector<vert_t>> &getMinDistances() const;
 
+    void complementEdges();
+
     void initMinDistances();
 
 private:
@@ -58,9 +60,9 @@ private:
 
     std::unordered_set<vert_t> mines;
 
-    vert_t punters_num;
+    vert_t punters_num = 0;
 
-    punter_t punter_id;
+    punter_t punter_id = 0;
 
     int currentTurn;
 
@@ -74,8 +76,8 @@ class GameStateBuilder {
 private:
     std::vector<VertexIncidence> incidence_list;
     std::unordered_set<vert_t> mines;
-    vert_t punter_id;
-    vert_t punters_num;
+    vert_t punter_id = 0;
+    vert_t punters_num = 0;
 
 public:
     std::vector<VertexIncidence> &incidence_list_ref() {
@@ -101,6 +103,8 @@ public:
         state->punters_num = punters_num;
         state->mines = mines;
         state->incidence_list = incidence_list;
+
+        state->complementEdges();
 
         return std::unique_ptr<GameState>(state);
     }
