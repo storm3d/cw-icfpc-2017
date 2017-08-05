@@ -15,9 +15,19 @@ typedef int64_t punter_t;
 
 typedef std::unordered_map<vert_t, punter_t> VertexIncidence;
 
+struct River {
+    vert_t from;
+    vert_t to;
+    River(vert_t from, vert_t to);
+
+    bool isAdjacent(const River &other) const;
+};
+
 class GameState {
 public:
     GameState();
+    GameState(std::istream &in);
+    GameState(std::string json);
 
     void serialize(std::ostream &out) const;
 
@@ -71,6 +81,8 @@ private:
 
     friend class GameStateBuilder;
 };
+
+std::istream & operator << (std::istream &in, GameState& game);
 
 class GameStateBuilder {
 private:

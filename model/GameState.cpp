@@ -8,8 +8,37 @@
 using json = nlohmann::json;
 using namespace std;
 
+River::River(vert_t from_, vert_t to_)
+{
+    if (from > to) {
+        from = to_;
+        to = from_;
+    } else {
+        from = from_;
+        to = to_;
+    }
+}
+
+bool River::isAdjacent(const River &other) const {
+    return
+            from == other.from
+            || to == other.to
+            || to == other.from
+            || from == other.to;
+}
+
 GameState::GameState() {
 }
+
+GameState::GameState(std::istream &in) {
+    deserialize(in);
+}
+
+GameState::GameState(std::string json) {
+    std::istringstream is(json);
+    deserialize(is);
+}
+
 
 void GameState::serialize(std::ostream &out) const {
 
@@ -106,6 +135,12 @@ void GameState::deserialize(json& state) {
             }
         }
     }
+}
+
+std::istream & operator << (std::istream &in, GameState& game)
+{
+    game.deserialize(in);
+    return in;
 }
 
 vert_t GameState::getPuntersNum() const {
