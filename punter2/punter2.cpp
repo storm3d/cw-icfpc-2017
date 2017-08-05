@@ -21,6 +21,7 @@ int main() {
     j0["me"] = "cw0";
     std::string handshake = j0.dump();
     std::cout<<handshake.size()<<":"<<handshake;
+    std::cout.flush();
 
     const clock_t begin_time = clock();
 
@@ -28,6 +29,7 @@ int main() {
     // TODO: proper reading length of JSON
     char ch;
     unsigned long len;
+    std::cin.setf(std::_S_unitbuf);
     std::cin>>len>>ch;
     for(int i=len; i-->0;) std::cin>>ch; // skip handshake
     std::cin>>len>>ch;
@@ -77,4 +79,5 @@ int main() {
 
     std::string sres = jres.dump();
     std::cout<<sres.size()<<":"<<sres;
+    std::cout.flush();
 }

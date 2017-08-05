@@ -3,7 +3,13 @@
 #include <memory>
 #include <json.hpp>
 
+#include <getopt.h>
+
 using json = nlohmann::json;
+
+std::string punter_name = "punter";
+std::string map_name = "sample";
+
 
 json read_file(const std::string & filename)
 {
@@ -15,7 +21,8 @@ json read_file(const std::string & filename)
 }
 
 std::string exec(const std::string & cmd, const std::string & input) {
-    std::array<char, 128> buffer;
+    const int buf_size = 128;
+    std::array<char, buf_size> buffer;
     std::string result;
 
     // write input to file
@@ -32,7 +39,7 @@ std::string exec(const std::string & cmd, const std::string & input) {
     if (!pipe) throw std::runtime_error("popen() failed!");
 
     while (!feof(pipe.get())) {
-        if (fgets(buffer.data(), 128, pipe.get()) != nullptr)
+        if (fgets(buffer.data(), buf_size, pipe.get()) != nullptr)
             result += buffer.data();
     }
     return result;
@@ -49,10 +56,14 @@ std::string wrap_json(const json& input)
 
 std::string call_punter(const json& input_json)
 {
+    std::string cmd;
 #ifdef WINVER
-    std::string cmd = "cmd /c punter.exe";
+    cmd = "cmd /c ";
+    cmd += punter_name;
+    cmd += ".exe";
 #else
-    std::string cmd = "./punter";
+    cmd = "./";
+    cmd += punter_name;
 #endif // WINDOWS
     json handshake;
     handshake["you"] = "cw";
@@ -87,10 +98,35 @@ json claim_move(int player, int src, int dst)
   return j;
 }
 
-int main() {
+/*json parse_response(std::stream & istream)
+{
+  
+}*/
+
+int main(int argc, char *argv[]) {
+      int opt;
+      while ((opt = getopt(argc, argv, "p:m:")) != -1) {
+        switch (opt) {
+        case 'p':
+            punter_name = optarg;
+            break;
+        case 'm':
+            map_name = optarg;
+            break;
+        default: /* '?' */
+            fprintf(stderr, "Usage: %s [-p punter] [-m map_name]\n",
+                    argv[0]);
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    //
     std::cout << "Local runner for punters" << std::endl;
-    json test = startup(1, 2, "../maps/sample.json");
-    std::cout << pass_move(0) << claim_move(1, 2, 3) << std::endl;
+    std::string map = "../maps/";
+    map += map_name;
+    map += ".json";
+    //std::cout<< map << "\n";
+    json test = startup(1, 2, map);
 
     std::cout << call_punter(test) << std::endl;
     return 0;
