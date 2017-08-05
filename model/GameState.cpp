@@ -197,7 +197,7 @@ punter_t GameState::getClaimerId(vert_t from, vert_t to) const {
         return it->second;
     }
 
-    return 0;
+    return -1;
 }
 
 void GameState::claimEdge(vert_t from, vert_t to, punter_t punter)  {
@@ -228,7 +228,7 @@ const std::unordered_set<vert_t>& GameState::getMines() const {
 const std::unordered_map<vert_t, std::vector<vert_t>> &GameState::getMinDistances() const {
     return min_distances;
 }
-
+/*
 // complement directional edges to unidirectional
 void GameState::complementEdges() {
     vert_t num = incidence_list.size();
@@ -245,6 +245,7 @@ void GameState::complementEdges() {
         }
     }
 }
+ */
 
 void GameState::initMinDistances()
 {
