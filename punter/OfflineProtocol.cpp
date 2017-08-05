@@ -3,7 +3,10 @@
 
 void OfflineProtocol::handleRequest(std::istream &in, std::ostream &out) {
     json request;
+
+    std::cerr << "Parsing state Json" << std::endl;
     in >> request;
+    std::cerr << "Parsed state Json" << std::endl;
 
     if (request.find("punter") != request.end()) {
         // setup request
@@ -16,7 +19,11 @@ void OfflineProtocol::handleRequest(std::istream &in, std::ostream &out) {
     } else if (request.find("move") != request.end()) {
         // move request
         std::cerr << "Handling Move request" << std::endl;
-        std::unique_ptr<GameState> state = extractStateFromSetupRequest(request);
+
+        //out << "{\"pass\":{\"punter\":" << 0 << "},\"state\":0}";
+
+
+        std::unique_ptr<GameState> state = extractStateFromMoveRequest(request);
         std::vector<Move> moves = extractMovesFromMoveRequest(request);
 
         for (auto& move : moves) {
@@ -55,8 +62,8 @@ std::unique_ptr<GameState> OfflineProtocol::extractStateFromSetupRequest(json &s
                 vert_t source = element["source"];
                 vert_t target = element["target"];
 
-                builder.incidence_list_ref()[source][target] = 0;
-                builder.incidence_list_ref()[target][source] = 0;
+                builder.incidence_list_ref()[source][target] = -1;
+                builder.incidence_list_ref()[target][source] = -1;
             }
         }
 
@@ -106,8 +113,7 @@ void OfflineProtocol::writeMoveResponse(std::ostream &out, GameState *state) {
     out << "{\"pass\":{\"punter\":" << state->getPunterId();
 //    out << "{\"claim\":{\"punter\":" << state->getPunterId();
 //    out << ",\"source\":" << ",\"target\":";
-    out << "}}";
-    out << "{\"state\":";
+    out << "}, \"state\": ";
     state->serialize(out);
     out << "}";
 }

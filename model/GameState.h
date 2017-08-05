@@ -11,13 +11,23 @@
 #include <json.hpp>
 
 typedef uint64_t vert_t;
-typedef uint64_t punter_t;
+typedef int64_t punter_t;
 
 typedef std::unordered_map<vert_t, punter_t> VertexIncidence;
+
+struct River {
+    vert_t from;
+    vert_t to;
+    River(vert_t from, vert_t to);
+
+    bool isAdjacent(const River &other) const;
+};
 
 class GameState {
 public:
     GameState();
+    GameState(std::istream &in);
+    GameState(std::string json);
 
     void serialize(std::ostream &out) const;
 
@@ -72,6 +82,8 @@ private:
     friend class GameStateBuilder;
 };
 
+std::istream & operator << (std::istream &in, GameState& game);
+
 class GameStateBuilder {
 private:
     std::vector<VertexIncidence> incidence_list;
@@ -104,7 +116,8 @@ public:
         state->mines = mines;
         state->incidence_list = incidence_list;
 
-        state->complementEdges();
+        // NO NEED TO DO THIS, we do it on deserialization
+        //state->complementEdges();
 
         return std::unique_ptr<GameState>(state);
     }

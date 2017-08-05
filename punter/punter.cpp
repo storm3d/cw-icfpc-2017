@@ -2,6 +2,9 @@
 #include <unistd.h>
 #include <fstream>
 #include "json.hpp"
+#include <unistd.h>
+#include <fcntl.h>
+
 #include "../model/GameState.h"
 #include "OfflineProtocol.h"
 
@@ -9,50 +12,31 @@ using namespace std;
 
 string readJson()
 {
-    const clock_t begin_time = clock();
-
-    char c = 0;
-    string sizeStr;
-    while(true)
-    {
-        usleep(1);
-        cin >> c;
-        if(c == ':')
-            break;
-        sizeStr += c;
-
-        if(float( clock () - begin_time ) / CLOCKS_PER_SEC > 15)
-            return "";
-    }
-
-    istringstream iss(sizeStr);
     unsigned long jsonLength;
-    iss >> jsonLength;
+    cin >> jsonLength;
+
+    cin.ignore(1);
 
     cerr << "FOUND JSON SIZE: " << jsonLength << endl;
 
-    string jsonStr;
+    string jsonStr(jsonLength, ' ');
+    cin.read(&jsonStr[0], jsonLength);
 
-    for(int i = 0; i < jsonLength; i++)
-    {
-        usleep(1);
-        cin >> c;
-        if(cin) {
-            jsonStr += c;
-            cerr << c;
-        }
-
-        if(float( clock () - begin_time ) / CLOCKS_PER_SEC > 15)
-            return "";
-    }
+    cerr << jsonStr << endl;
 
     return jsonStr;
 }
 
-
 int main( int argc, char* argv[] ) {
 
     const clock_t begin_time = clock();
+
+    if(argc > 2 && !strcmp(argv[1], "-f")) {
+        std::ifstream ifs(argv[2]);
+        OfflineProtocol offlineProtocol;
+        offlineProtocol.handleRequest(ifs, cout);
+        return 0;
+    }
 
     //std::ofstream ofs ("punter.log", std::ofstream::out);
     //ofs << "Log started" << std::endl;
@@ -62,7 +46,7 @@ int main( int argc, char* argv[] ) {
     nlohmann::json j;
     j["me"] = "cw";
     std::string handshake = j.dump();
-    std::cout<<handshake.size()<<":"<<handshake<<std::endl;
+    std::cout<<handshake.size()<<":"<<handshake;
 
     cerr << endl << "reading 1st json" << endl;
     string hanshake = readJson();
@@ -80,20 +64,8 @@ int main( int argc, char* argv[] ) {
     cerr << endl << "writing response: " << endl;
     cerr <<oss.str().size()<<":"<<oss.str()<<std::endl;
 
-    std::cout<<oss.str().size()<<":"<<oss.str()<<std::endl;
-
+    std::cout<<oss.str().size()<<":"<<oss.str();
     cerr << endl << "move written! " << endl;
-
-    string justWait = readJson();
-
-/*
-    nlohmann::json j2;
-    j2["ready"] = "cw";
-    std::string handshake2 = j2.dump();
-    std::cout<<handshake2.size()<<":"<<handshake2;
-*/
-
-    //ofs.close();
 
     std::cerr <<  std::endl << "Execution time: "
               << float( clock () - begin_time ) / CLOCKS_PER_SEC

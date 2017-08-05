@@ -6,9 +6,39 @@
 
 // for convenience
 using json = nlohmann::json;
+using namespace std;
+
+River::River(vert_t from_, vert_t to_)
+{
+    if (from > to) {
+        from = to_;
+        to = from_;
+    } else {
+        from = from_;
+        to = to_;
+    }
+}
+
+bool River::isAdjacent(const River &other) const {
+    return
+            from == other.from
+            || to == other.to
+            || to == other.from
+            || from == other.to;
+}
 
 GameState::GameState() {
 }
+
+GameState::GameState(std::istream &in) {
+    deserialize(in);
+}
+
+GameState::GameState(std::string json) {
+    std::istringstream is(json);
+    deserialize(is);
+}
+
 
 void GameState::serialize(std::ostream &out) const {
 
@@ -33,11 +63,14 @@ void GameState::serialize(std::ostream &out) const {
     for (vert_t v1 = 0; v1 < incidence_list.size(); v1++)
     {
         for (auto& vi : incidence_list[v1]) {
+            if(v1 >= vi.first)
+                continue;
+
             if (comma) {
                 out << ',';
             }
             comma = true;
-            out << "{\"source\":" << v1 << ",\"target\":" << vi.first << ",\"punter\":" << vi.second << '}';
+            out << "{\"s\":" << v1 << ",\"t\":" << vi.first << ",\"p\":" << vi.second << '}';
         }
     }
     out     << "], "; // rivers
@@ -66,6 +99,8 @@ void GameState::deserialize(std::istream &in) {
 }
 
 void GameState::deserialize(json& state) {
+    cerr << "GameState::deserialize" << endl;
+
     punters_num = state["punters"];
     punter_id = state["punter"];
 
@@ -84,9 +119,9 @@ void GameState::deserialize(json& state) {
 
         if(map["rivers"].is_array()) {
             for (auto& element : map["rivers"]) {
-                vert_t source = element["source"];
-                vert_t target = element["target"];
-                vert_t punter = element["punter"];
+                vert_t source = element["s"];
+                vert_t target = element["t"];
+                vert_t punter = element["p"];
 
                 incidence_list[source][target] = punter;
                 incidence_list[target][source] = punter;
@@ -100,6 +135,12 @@ void GameState::deserialize(json& state) {
             }
         }
     }
+}
+
+std::istream & operator << (std::istream &in, GameState& game)
+{
+    game.deserialize(in);
+    return in;
 }
 
 vert_t GameState::getPuntersNum() const {
@@ -193,10 +234,12 @@ void GameState::complementEdges() {
     vert_t num = incidence_list.size();
     for (vert_t i = 0; i < num; i++) {
         for (auto& vi : incidence_list[i]) {
-            vert_t puntor = vi.second;
+            punter_t puntor = vi.second;
 
             if (vi.first >= incidence_list.size())
                 incidence_list.resize(vi.first + 1);
+
+            //cerr << "comp " << incidence_list[vi.first][i] << " " << puntor << endl;
 
             incidence_list[vi.first][i] = puntor;
         }
