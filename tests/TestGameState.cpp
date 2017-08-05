@@ -11,7 +11,7 @@
 
 using nlohmann::json;
 
-static GameState getSampleGameState()
+static GameState deserializeState()
 {
     std::istringstream iss ("{\"punter\":0,\n"
                                     "\"punters\":2,\n"
@@ -21,35 +21,40 @@ static GameState getSampleGameState()
                                     "{\"source\":3,\"target\":5},{\"source\":6,\"target\":7},{\"source\":5,\"target\":7},\n"
                                     "{\"source\":1,\"target\":7},{\"source\":0,\"target\":7},{\"source\":1,\"target\":2}],\n"
                                     "\"mines\":[1,5]}}");
-    GameState state(iss);
+
+    json j;
+    iss >> j;
+
+    GameState state;
+    state.deserialize(j);
     return state;
 }
 
 TEST_CASE( "GameState.getPuntersNum() should return correct value", "[GameState]" ) {
-    REQUIRE(getSampleGameState().getPuntersNum() == 2 );
+    REQUIRE(deserializeState().getPuntersNum() == 2 );
 }
 
 TEST_CASE( "GameState.getSitesNum() should return correct value", "[GameState]" ) {
-    REQUIRE(getSampleGameState().getSitesNum() == 8 );
+    REQUIRE(deserializeState().getSitesNum() == 8 );
 }
 
 TEST_CASE( "GameState.getPunterId() should return correct value", "[GameState]" ) {
-    REQUIRE(getSampleGameState().getPunterId() == 0 );
+    REQUIRE(deserializeState().getPunterId() == 0 );
 }
 
 TEST_CASE( "GameState.isEdge() should return correct value", "[GameState]" ) {
-    REQUIRE(getSampleGameState().isEdge(3, 4) );
-    REQUIRE( !getSampleGameState().isEdge(3, 7) );
+    REQUIRE(deserializeState().isEdge(3, 4) );
+    REQUIRE( !deserializeState().isEdge(3, 7) );
 }
 
 TEST_CASE( "GameState.isMine() should return correct value", "[GameState]" ) {
-    REQUIRE(getSampleGameState().isMine(5) );
-    REQUIRE( !getSampleGameState().isMine(2) );
+    REQUIRE(deserializeState().isMine(5) );
+    REQUIRE( !deserializeState().isMine(2) );
 }
 
 TEST_CASE( "GameState serialization" ) {
     std::ostringstream os;
-    getSampleGameState().serialize(os);
+    deserializeState().serialize(os);
 
     std::string s = os.str();
 
@@ -57,6 +62,29 @@ TEST_CASE( "GameState serialization" ) {
     REQUIRE( jee["punters"] == 2 );
     REQUIRE( jee["punter"] == 0 );
     REQUIRE( jee["map"]["mines"].size() == 2 );
+}
+
+TEST_CASE("GameState serialization contains river punters") {
+    const vert_t PUNTER_1 = 101;
+    const vert_t PUNTER_2 = 201;
+
+    GameStateBuilder builder;
+    builder.incidence_list_ref().resize(3);
+    builder.incidence_list_ref()[0][1] = PUNTER_1;
+    builder.incidence_list_ref()[0][2] = PUNTER_2;
+
+    std::stringstream ss;
+    builder.build()->serialize(ss);
+
+    std::cout << ss.str();
+    ss.seekg(0, std::ios::beg);
+
+    GameState state;
+    state.deserialize(ss);
+
+    REQUIRE(state.getEdgesFrom(0).size() == 2);
+    REQUIRE(state.getEdgesFrom(0).at(1) == PUNTER_1);
+    REQUIRE(state.getEdgesFrom(0).at(2) == PUNTER_2);
 }
 
 #pragma clang diagnostic pop

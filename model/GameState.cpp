@@ -8,51 +8,12 @@
 using json = nlohmann::json;
 
 GameState::GameState() {
-
-}
-
-GameState::GameState(std::istream &in) {
-    json j;
-    in >> j;
-    punters_num = j["punters"];
-    punter_id = j["punter"];
-
-    if(j["map"].is_object())
-    {
-        json &map = j["map"];
-        if(map["sites"].is_array()) {
-            incidence_list.resize(map["sites"].size());
-            for (auto& element : map["sites"]) {
-                int id = element["id"];
-
-                incidence_list[id] = VertexIncidence();
-                //std::cout << element << '\n';
-            }
-        }
-
-        if(map["rivers"].is_array()) {
-            for (auto& element : map["rivers"]) {
-                vert_t source = element["source"];
-                vert_t target = element["target"];
-
-                incidence_list[source][target] = 0;
-                incidence_list[target][source] = 0;
-            }
-        }
-
-        if(map["mines"].is_array()) {
-            for (auto &element : map["mines"]) {
-                vert_t id = element;
-                mines.insert(id);
-            }
-        }
-    }
 }
 
 void GameState::serialize(std::ostream &out) const {
 
-    out << "{\"punter\": " << punter_id << ','
-        << "\"punters\": " << punters_num << ','
+    out << "{\"punter\":" << punter_id << ','
+        << "\"punters\":" << punters_num << ','
         << "\"map\": {";
 
     out     << "\"sites\": [";
@@ -63,7 +24,7 @@ void GameState::serialize(std::ostream &out) const {
             out << ',';
         }
         comma = true;
-        out     << "{\"site\": " << v << '}';
+        out     << "{\"id\":" << v << '}';
     }
     out     << "], "; // sites
 
@@ -71,13 +32,12 @@ void GameState::serialize(std::ostream &out) const {
     comma = false;
     for (vert_t v1 = 0; v1 < incidence_list.size(); v1++)
     {
-        for (vert_t v2 = 0; v2 < incidence_list.size(); v2++)
-        {
+        for (auto& vi : incidence_list[v1]) {
             if (comma) {
                 out << ',';
             }
             comma = true;
-            out     << "{\"source\": " << v1 << ", \"target\": " << v2 << '}';
+            out << "{\"source\":" << v1 << ",\"target\":" << vi.first << ",\"punter\":" << vi.second << '}';
         }
     }
     out     << "], "; // rivers
@@ -97,6 +57,12 @@ void GameState::serialize(std::ostream &out) const {
 
     out << "}"; // map
     out << "}\n"; // state
+}
+
+void GameState::deserialize(std::istream &in) {
+    json j;
+    in >> j;
+    deserialize(j);
 }
 
 void GameState::deserialize(json& state) {
@@ -120,9 +86,10 @@ void GameState::deserialize(json& state) {
             for (auto& element : map["rivers"]) {
                 vert_t source = element["source"];
                 vert_t target = element["target"];
+                vert_t punter = element["punter"];
 
-                incidence_list[source][target] = 0;
-                incidence_list[target][source] = 0;
+                incidence_list[source][target] = punter;
+                incidence_list[target][source] = punter;
             }
         }
 
