@@ -115,6 +115,10 @@ vert_t GameState::getMinesNum() const {
     return mines.size();
 }
 
+int GameState::getCurrentTurnNum() const {
+    return currentTurn;
+}
+
 bool GameState::isMine(vert_t i) const {
     return mines.find(i) != mines.end();
 }
