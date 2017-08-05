@@ -7,11 +7,15 @@
 // for convenience
 using json = nlohmann::json;
 
+GameState::GameState() {
+
+}
+
 GameState::GameState(std::istream &in) {
     json j;
     in >> j;
-    puntersNum = j["punters"];
-    punterId = j["punter"];
+    punters_num = j["punters"];
+    punter_id = j["punter"];
 
     if(j["map"].is_object())
     {
@@ -47,8 +51,8 @@ GameState::GameState(std::istream &in) {
 
 void GameState::serialize(std::ostream &out) const {
 
-    out << "{\"punter\": " << punterId << ','
-        << "\"punters\": " << puntersNum << ','
+    out << "{\"punter\": " << punter_id << ','
+        << "\"punters\": " << punters_num << ','
         << "\"map\": {";
 
     out     << "\"sites\": [";
@@ -96,11 +100,11 @@ void GameState::serialize(std::ostream &out) const {
 }
 
 vert_t GameState::getPuntersNum() const {
-    return puntersNum;
+    return punters_num;
 }
 
 punter_t GameState::getPunterId() const {
-    return punterId;
+    return punter_id;
 }
 
 vert_t GameState::getSitesNum() const {
