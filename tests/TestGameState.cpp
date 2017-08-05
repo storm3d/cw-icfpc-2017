@@ -1,9 +1,15 @@
-#include "catch.hpp"
+#include <catch.hpp>
+#include <json.hpp>
 
-#include <sstream>      // std::istringstream
-#include <string>       // std::string
+#include <sstream>
+#include <string>
 
 #include "../model/GameState.h"
+
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "ClangTidyInspection"
+
+using nlohmann::json;
 
 GameState getSampleGameState()
 {
@@ -32,11 +38,25 @@ TEST_CASE( "GameState.getPunterId() should return correct value", "[GameState]" 
 }
 
 TEST_CASE( "GameState.isEdge() should return correct value", "[GameState]" ) {
-    REQUIRE( getSampleGameState().isEdge(3, 4) == true );
-    REQUIRE( getSampleGameState().isEdge(3, 7) == false );
+    REQUIRE( getSampleGameState().isEdge(3, 4) );
+    REQUIRE( !getSampleGameState().isEdge(3, 7) );
 }
 
 TEST_CASE( "GameState.isMine() should return correct value", "[GameState]" ) {
-    REQUIRE( getSampleGameState().isMine(5) == true );
-    REQUIRE( getSampleGameState().isMine(2) == false );
+    REQUIRE( getSampleGameState().isMine(5) );
+    REQUIRE( !getSampleGameState().isMine(2) );
 }
+
+TEST_CASE( "GameState serialization" ) {
+    std::ostringstream os;
+    getSampleGameState().serialize(os);
+
+    std::string s = os.str();
+
+    nlohmann::json jee = nlohmann::json::parse(s);
+    REQUIRE( jee["punters"] == 2 );
+    REQUIRE( jee["punter"] == 0 );
+    REQUIRE( jee["map"]["mines"].size() == 2 );
+}
+
+#pragma clang diagnostic pop

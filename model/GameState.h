@@ -15,7 +15,7 @@ typedef std::unordered_map<vert_t, punter_t> VertexIncidence;
 class GameState {
 public:
     GameState(std::istream &in);
-	void Serialize(std::ostream &out) const;
+	void serialize(std::ostream &out) const;
 
     vert_t getSitesNum() const;
     vert_t getPuntersNum() const;

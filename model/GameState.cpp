@@ -1,6 +1,7 @@
 #include <cassert>
+#include <json.hpp>
+
 #include "GameState.h"
-#include "json.hpp"
 #include "Dijkstra.h"
 
 // for convenience
@@ -44,13 +45,54 @@ GameState::GameState(std::istream &in) {
     }
 }
 
-void GameState::Serialize(std::ostream &out) const {
-    json j = {{"state",
-                      {
-                              {"punters", puntersNum}
-                      }
-    }};
-    out << j;
+void GameState::serialize(std::ostream &out) const {
+
+    out << "{\"punter\": " << punterId << ','
+        << "\"punters\": " << puntersNum << ','
+        << "\"map\": {";
+
+    out     << "\"sites\": [";
+    bool comma = false;
+    for (vert_t v = 0; v < incidence_list.size(); v++)
+    {
+        if (comma) {
+            out << ',';
+        }
+        comma = true;
+        out     << "{\"site\": " << v << '}';
+    }
+    out     << "], "; // sites
+
+    out     << "\"rivers\": [";
+    comma = false;
+    for (vert_t v1 = 0; v1 < incidence_list.size(); v1++)
+    {
+        for (vert_t v2 = 0; v2 < incidence_list.size(); v2++)
+        {
+            if (comma) {
+                out << ',';
+            }
+            comma = true;
+            out     << "{\"source\": " << v1 << ", \"target\": " << v2 << '}';
+        }
+    }
+    out     << "], "; // rivers
+
+    out     << "\"mines\": [";
+    comma = false;
+    for (vert_t v : mines)
+    {
+        if (comma) {
+            out << ',';
+        }
+        comma = true;
+        out     << v;
+    }
+    out     << "] "; // mines
+
+
+    out << "}"; // map
+    out << "}\n"; // state
 }
 
 vert_t GameState::getPuntersNum() const {

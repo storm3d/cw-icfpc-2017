@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.8)
 project(cw_icfpc_2017)
 
-include_directories(include)
+include_directories(include SYSTEM)
 
 set(CMAKE_CXX_STANDARD 11)
 
