@@ -12,7 +12,7 @@ using json = nlohmann::json;
 
 std::vector<std::string> g_PunterNames = {};
 std::string g_MapName = "sample";
-int g_Punters = 0;
+int g_Punters = 2;
 int g_LogPunter = 0;
 int g_LogState = 0;
 
@@ -260,8 +260,8 @@ int main(int argc, char *argv[]) {
     // default punter name
     if (g_PunterNames.size() < 1) g_PunterNames.push_back("punter");
     // calc punters
-    if (g_Punters < 2)
-      g_Punters = 2;
+    if (g_Punters < 1)
+      g_Punters = 1;
     
     // spread values
     while (g_PunterNames.size() < g_Punters)
