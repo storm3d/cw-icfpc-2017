@@ -11,6 +11,7 @@ using json = nlohmann::json;
 std::vector<std::string> g_PunterNames = {};
 std::string g_MapName = "sample";
 int g_Punters = 0;
+int g_LogPunter = 0;
 
 json read_file(const std::string & filename)
 {
@@ -106,6 +107,7 @@ json parse_response(const std::string & response)
 struct runner_state{
   std::vector<json> m_States;
   std::vector<json> m_Moves;
+  json m_Map;
   int turns;
 
   void init (int n, const json& map)
@@ -117,6 +119,7 @@ struct runner_state{
       m_States.push_back(j);
       m_Moves.push_back(create_pass_move(i));
     }
+    m_Map = map;
     turns = map["rivers"].size();
   }
 
@@ -156,11 +159,52 @@ struct runner_state{
       return res;
   }
 
+  void log(int punter, const std::string & data)
+  {
+    if(g_LogPunter == -1)
+    {
+        std::cout<<data<<std::endl;
+    }
+    else
+    {
+      if (punter == g_LogPunter)
+      {
+        json log_move = create_move_query(g_LogPunter);
+        log_move["state"] = "###";
+        std::cout<<"in:"<<std::endl<<log_move.dump()<<std::endl;
+      }
+    }
+  }
+
+  void first_log()
+  {
+    if (g_LogPunter == -1) return;
+
+    json log_start = create_startup(g_LogPunter, g_Punters, m_Map);
+    
+    std::cout<<"in:"<<std::endl<<log_start.dump()<<std::endl;
+  }
+
+  void final_log()
+  {
+    if (g_LogPunter == -1) return;
+
+    json log_stop;
+    log_stop["stop"] = create_move_query(g_LogPunter)["move"];
+    log_stop["state"] = "###";
+    std::cout<<"in:"<<std::endl<<log_stop.dump()<<std::endl;
+
+    std::cout<<std::endl<<"SCORES: "<< ""; //0, 22, 0, 1, 0, 3, 2, 39, 
+    std::cout<<std::endl<<"OUR SCORE: " << 0 << std::endl;
+    std::cout<<std::endl<<"FINISHED IN : "<<turns<<" TURNS"<< std::endl;
+  }
+
 } g_State;
+
 
 int main(int argc, char *argv[]) {
       int opt;
-      while ((opt = getopt(argc, argv, "p:m:n:")) != -1) {
+      while ((opt = getopt(argc, argv, "p:m:n:l:")) != -1) {
         switch (opt) {
         case 'p':
             g_PunterNames.push_back(optarg);
@@ -171,8 +215,11 @@ int main(int argc, char *argv[]) {
         case 'n':
             g_Punters = atoi(optarg);
             break;
+        case 'l':
+            g_LogPunter = atoi(optarg);
+            break;
         default: /* '?' */
-            fprintf(stderr, "Usage: %s [-m g_MapName] [-n punters] [-p punter_name]\n",
+            fprintf(stderr, "Usage: %s [-l log_punter] [-m g_MapName] [-n punters] [-p punter_name]\n",
                     argv[0]);
             exit(EXIT_FAILURE);
         }
@@ -188,7 +235,7 @@ int main(int argc, char *argv[]) {
     while (g_PunterNames.size() < g_Punters)
       g_PunterNames.push_back(g_PunterNames[g_PunterNames.size()-1]);
     
-    std::cout << "Local runner for punters" << std::endl;
+    std::cout << "Local runner for punters. log punter #" << g_LogPunter << std::endl;
     std::string map = "../maps/";
     map += g_MapName;
     map += ".json";
@@ -196,12 +243,13 @@ int main(int argc, char *argv[]) {
     //std::cout<< map << "\n";
     
     g_State.init(g_Punters, map_data);
-    
+    g_State.first_log();
+
     for (int i = 0; i < g_Punters; i++)
     {
       json test = create_startup(i, g_Punters, map_data);
       std::string response = call_punter(i, test);
-        std::cout<<response<<std::endl;
+      g_State.log(-i, response);
       g_State.process_response(i, parse_response(response));
     }
 
@@ -210,8 +258,9 @@ int main(int argc, char *argv[]) {
         int punter = turn % g_Punters;
         json test = g_State.create_move_query(punter);
         std::string response = call_punter(punter, test);
-        std::cout<<response<<std::endl;
+        g_State.log(punter, response);
         g_State.process_response(punter, parse_response(response));
     }
+    g_State.final_log();
     return 0;
 }
