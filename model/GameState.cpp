@@ -1,5 +1,6 @@
 #include <cassert>
 #include <climits>
+#include <set>
 #include "GameState.h"
 
 // for convenience
@@ -8,8 +9,7 @@ using namespace std;
 
 const River River::EMPTY = River(0, 0);
 
-River::River(vert_t from_, vert_t to_)
-{
+River::River(vert_t from_, vert_t to_) {
     if (from_ > to_) {
         from = to_;
         to = from_;
@@ -59,24 +59,22 @@ void GameState::serialize(std::ostream &out) const {
         << "\"punters\":" << punters_num << ','
         << "\"map\": {";
 
-    out     << "\"sites\": [";
+    out << "\"sites\": [";
     bool comma = false;
-    for (vert_t v = 0; v < incidence_list.size(); v++)
-    {
+    for (vert_t v = 0; v < incidence_list.size(); v++) {
         if (comma) {
             out << ',';
         }
         comma = true;
-        out     << "{\"id\":" << v << '}';
+        out << "{\"id\":" << v << '}';
     }
-    out     << "], "; // sites
+    out << "], "; // sites
 
-    out     << "\"rivers\": [";
+    out << "\"rivers\": [";
     comma = false;
-    for (vert_t v1 = 0; v1 < incidence_list.size(); v1++)
-    {
-        for (auto& vi : incidence_list[v1]) {
-            if(v1 >= vi.first)
+    for (vert_t v1 = 0; v1 < incidence_list.size(); v1++) {
+        for (auto &vi : incidence_list[v1]) {
+            if (v1 >= vi.first)
                 continue;
 
             if (comma) {
@@ -90,8 +88,7 @@ void GameState::serialize(std::ostream &out) const {
 
     out << "\"mines\": [";
     comma = false;
-    for (vert_t v : mines)
-    {
+    for (vert_t v : mines) {
         if (comma) {
             out << ',';
         }
@@ -100,8 +97,19 @@ void GameState::serialize(std::ostream &out) const {
     }
     out << "] "; // mines
 
-
     out << "}"; // map
+
+    out << ",\"remap_ids\":" << remap_ids;
+    if (remap_ids) {
+        out << ",\"external_ids\":[";
+        comma = false;
+        for (vert_t id : internal_to_external_id_mapping) {
+            if (comma) out << ',';
+            out << id;
+            comma = true;
+        }
+        out << ']';
+    }
     out << "}"; // state
 }
 
@@ -111,7 +119,7 @@ void GameState::deserialize(std::istream &in) {
     deserialize(j);
 }
 
-void GameState::deserialize(nlohmann::json& state) {
+void GameState::deserialize(nlohmann::json &state) {
     //cerr << "GameState::deserialize" << endl;
 
     punters_num = state["punters"];
@@ -119,12 +127,11 @@ void GameState::deserialize(nlohmann::json& state) {
     currentTurn = state["turn"];
     currentTurn++;
 
-    if(state["map"].is_object())
-    {
+    if (state["map"].is_object()) {
         json &map = state["map"];
-        if(map["sites"].is_array()) {
+        if (map["sites"].is_array()) {
             incidence_list.resize(map["sites"].size());
-            for (auto& element : map["sites"]) {
+            for (auto &element : map["sites"]) {
                 int id = element["id"];
 
                 incidence_list[id] = VertexIncidence();
@@ -132,8 +139,8 @@ void GameState::deserialize(nlohmann::json& state) {
             }
         }
 
-        if(map["rivers"].is_array()) {
-            for (auto& element : map["rivers"]) {
+        if (map["rivers"].is_array()) {
+            for (auto &element : map["rivers"]) {
                 vert_t source = element["s"];
                 vert_t target = element["t"];
                 vert_t punter = element["p"];
@@ -143,19 +150,30 @@ void GameState::deserialize(nlohmann::json& state) {
             }
         }
 
-        if(map["mines"].is_array()) {
+        if (map["mines"].is_array()) {
             for (auto &element : map["mines"]) {
                 vert_t id = element;
                 mines.insert(id);
             }
+        }
+
+    }
+
+    remap_ids = state["remap_ids"] != 0;
+    if (remap_ids) {
+        vert_t internal_id = 0;
+        for (auto &element : state["external_ids"]) {
+            vert_t external_id = element;
+            internal_to_external_id_mapping.push_back(external_id);
+            external_to_internal_id_mapping[external_id] = internal_id;
+            internal_id++;
         }
     }
 
     incidence_available = incidence_list;
 }
 
-std::istream & operator << (std::istream &in, GameState& game)
-{
+std::istream &operator<<(std::istream &in, GameState &game) {
     game.deserialize(in);
     return in;
 }
@@ -185,8 +203,7 @@ bool GameState::isMine(vert_t i) const {
 }
 
 bool GameState::isEdge(vert_t from, vert_t to) const {
-    if (from > to)
-    {
+    if (from > to) {
         vert_t tmp = from;
         from = to;
         to = tmp;
@@ -199,8 +216,7 @@ bool GameState::isEdge(vert_t from, vert_t to) const {
 }
 
 punter_t GameState::getClaimerId(vert_t from, vert_t to) const {
-    if (from > to)
-    {
+    if (from > to) {
         vert_t tmp = from;
         from = to;
         to = tmp;
@@ -209,23 +225,21 @@ punter_t GameState::getClaimerId(vert_t from, vert_t to) const {
     assert(to < incidence_list.size());
 
     auto it = incidence_list[from].find(to);
-    if (it != incidence_list[from].end())
-    {
+    if (it != incidence_list[from].end()) {
         return it->second;
     }
 
     return -1;
 }
 
-void GameState::claimEdge(vert_t from, vert_t to, punter_t punter)  {
-    if (from > to)
-    {
+void GameState::claimEdge(vert_t from, vert_t to, punter_t punter) {
+    if (from > to) {
         vert_t tmp = from;
         from = to;
         to = tmp;
     }
 
-    if(punter == punter_id) {
+    if (punter == punter_id) {
         our_sites.insert(from);
         our_sites.insert(to);
     }
@@ -233,15 +247,13 @@ void GameState::claimEdge(vert_t from, vert_t to, punter_t punter)  {
     assert(to < incidence_list.size());
 
     auto it = incidence_list[from].find(to);
-    if (it != incidence_list[from].end())
-    {
+    if (it != incidence_list[from].end()) {
         incidence_list[from][to] = punter;
         incidence_available[from].erase(to);
     }
 
     it = incidence_list[to].find(from);
-    if (it != incidence_list[to].end())
-    {
+    if (it != incidence_list[to].end()) {
         incidence_list[to][from] = punter;
         incidence_available[to].erase(from);
     }
@@ -255,13 +267,14 @@ const std::unordered_map<vert_t, punter_t> &GameState::getAvailableEdgesFrom(ver
     return incidence_available[vertex];
 }
 
-const std::unordered_set<vert_t>& GameState::getMines() const {
+const std::unordered_set<vert_t> &GameState::getMines() const {
     return mines;
 }
 
 const std::unordered_map<vert_t, std::vector<vert_t>> &GameState::getMinDistances() const {
     return min_distances;
 }
+
 /*
 // complement directional edges to unidirectional
 void GameState::complementEdges() {
@@ -281,8 +294,7 @@ void GameState::complementEdges() {
 }
  */
 
-void GameState::initMinDistances()
-{
+void GameState::initMinDistances() {
     vert_t vertices_num = incidence_list.size();
     vert_t mines_num = mines.size();
 
@@ -314,19 +326,87 @@ void GameState::initMinDistances()
     }
 }
 
+void GameStateBuilder::add_river(vert_t from, vert_t to, punter_t punter) {
+    if (incidence_map.find(from) == incidence_map.end())
+        incidence_map[from] = VertexIncidence();
+
+    incidence_map[from][to] = punter;
+
+    if (incidence_map.find(to) == incidence_map.end())
+        incidence_map[to] = VertexIncidence();
+
+    incidence_map[to][from] = punter;
+}
+
+const vert_t GameState::toInternalId(vert_t externalId) {
+    return remap_ids ? external_to_internal_id_mapping[externalId] : externalId;
+}
+
+const vert_t GameState::toExternalId(vert_t internalId) {
+    return remap_ids ? internal_to_external_id_mapping[internalId] : internalId;
+}
+
+
+std::unique_ptr<GameState> GameStateBuilder::build() {
+    auto *state = new GameState();
+
+    state->punter_id = punter_id;
+    state->punters_num = punters_num;
+
+    state->remap_ids = !sites.empty()
+                       && (*sites.rbegin() != sites.size() - 1 || *sites.begin() != 0);
+
+    if (state->remap_ids) {
+        state->internal_to_external_id_mapping.resize(sites.size());
+
+        vert_t internal_id = 0;
+        for (auto s : sites) {
+            state->internal_to_external_id_mapping[internal_id] = s;
+            state->external_to_internal_id_mapping[s] = internal_id;
+
+            internal_id++;
+        }
+    }
+
+    for (auto mine : mines)
+        state->mines.insert(state->toInternalId(mine));
+
+    std::vector<VertexIncidence> incidence_list(sites.size());
+
+    for (auto &incidence : incidence_map) {
+        if (!state->remap_ids) {
+            incidence_list[incidence.first] = incidence.second;
+
+        } else {
+            vert_t from_id = state->toInternalId(incidence.first);
+            for (auto &pair : incidence.second) {
+                vert_t to_id = state->toInternalId(pair.first);
+                incidence_list[from_id][to_id] = pair.second;
+            }
+        }
+    }
+
+    state->incidence_list = incidence_list;
+    // TODO: When we read other player's moves, remove edges from here.
+    // This is already done in gameState::claimEdge(), so it's wise to use it to record moves.
+    state->incidence_available = incidence_list;
+
+    return std::unique_ptr<GameState>(state);
+}
+
 void GameState::initPotentials(int depth) {
 
     potential_list.resize(getSitesNum(), 0);
-    for(int i = 0; i < getSitesNum(); i++) {
+    for (int i = 0; i < getSitesNum(); i++) {
         potential_t pot = incidence_list[i].size();
-        if(isMine(i))
-            pot+= MINE_POTENTIAL;
+        if (isMine(i))
+            pot += MINE_POTENTIAL;
         potentialAt(i) = pot;
         //cerr << "pot[" << i << "]=" << pot << endl;
     }
 
     // propagate
-    for(int i = 0; i < 3; i++) {
+    for (int i = 0; i < 3; i++) {
         std::vector<potential_t> new_potential_list(potential_list);
         for (int i = 0; i < getSitesNum(); i++) {
             for (auto near: incidence_list[i]) {

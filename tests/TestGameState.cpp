@@ -15,6 +15,7 @@ static GameState deserializeState() {
     std::istringstream iss("{\"punter\":0,\n"
                                    "\"punters\":2,\n"
                                    "\"turn\":0,\n"
+                                   "\"remap_ids\":false,"
                                    "\"map\":{\"sites\":[{\"id\":4},{\"id\":1},{\"id\":3},{\"id\":6},{\"id\":5},{\"id\":0},{\"id\":7},{\"id\":2}],\n"
                                    "\"rivers\":[{\"s\":3,\"t\":4,\"p\":0},{\"s\":0,\"t\":1,\"p\":0},{\"s\":2,\"t\":3,\"p\":0},\n"
                                    "{\"s\":1,\"t\":3,\"p\":0},{\"s\":5,\"t\":6,\"p\":0},{\"s\":4,\"t\":5,\"p\":0},\n"
@@ -66,14 +67,16 @@ TEST_CASE("GameState serialization contains river punters") {
     const vert_t PUNTER_2 = 201;
 
     GameStateBuilder builder;
-    builder.incidence_list_ref().resize(3);
-    builder.incidence_list_ref()[0][1] = PUNTER_1;
-    builder.incidence_list_ref()[0][2] = PUNTER_2;
+    builder.sites_ref().insert(0);
+    builder.sites_ref().insert(1);
+    builder.sites_ref().insert(2);
+
+    builder.add_river(0, 1, PUNTER_1);
+    builder.add_river(0, 2, PUNTER_2);
 
     std::stringstream ss;
     builder.build()->serialize(ss);
 
-    std::cout << ss.str();
     ss.seekg(0, std::ios::beg);
 
     GameState state;
@@ -84,24 +87,25 @@ TEST_CASE("GameState serialization contains river punters") {
     REQUIRE(state.getEdgesFrom(0).at(2) == PUNTER_2);
 }
 
-TEST_CASE("Game state has complemented adjucency list") {
-    // site -- site -- site
+TEST_CASE("GameState serialization of sparse ids") {
     GameStateBuilder builder;
-    builder.incidence_list_ref().resize(3);
-    builder.incidence_list_ref()[0][1] = 0;
-    builder.incidence_list_ref()[1][2] = 0;
+    builder.sites_ref().insert(5);
+    builder.sites_ref().insert(10);
 
-    auto state = builder.build();
-    REQUIRE(state->getEdgesFrom(0).size() == 1);
-    REQUIRE(state->getEdgesFrom(0).at(1) == 0);
+    builder.add_river(5, 10, -1);
 
-    REQUIRE(state->getEdgesFrom(1).size() == 2);
-    REQUIRE(state->getEdgesFrom(1).at(0) == 0);
-    REQUIRE(state->getEdgesFrom(1).at(2) == 0);
+    std::stringstream ss;
+    builder.build()->serialize(ss);
 
-    REQUIRE(state->getEdgesFrom(2).size() == 1);
-    REQUIRE(state->getEdgesFrom(2).at(1) == 0);
+    std::cout << ss.str();
+    ss.seekg(0, std::ios::beg);
 
+    GameState state;
+    state.deserialize(ss);
+
+    REQUIRE(state.toInternalId(5) == 0);
+    REQUIRE(state.toInternalId(10) == 1);
+    REQUIRE(state.isEdge(0, 1));
 }
 
 // TODO Fix getMinDistances to make this test pass
@@ -109,11 +113,10 @@ TEST_CASE("Game state has complemented adjucency list") {
 //    // mine -- site -- site
 //    GameStateBuilder builder;
 //    builder.mines_ref().insert(0);
-//    builder.incidence_list_ref().resize(3);
-//    builder.incidence_list_ref()[0][1] = 0;
-//    builder.incidence_list_ref()[1][0] = 0;
-//    builder.incidence_list_ref()[1][2] = 0;
-//    builder.incidence_list_ref()[2][1] = 0;
+//    builder.incidence_map_ref()[0][1] = 0;
+//    builder.incidence_map_ref()[1][0] = 0;
+//    builder.incidence_map_ref()[1][2] = 0;
+//    builder.incidence_map_ref()[2][1] = 0;
 //
 //    auto state = builder.build();
 //

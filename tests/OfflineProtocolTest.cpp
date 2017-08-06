@@ -13,7 +13,7 @@
 
 using nlohmann::json;
 
-static GameState extractSampleGameStateFromSetupRequest() {
+static GameState sampleStateFromSetupRequest() {
     std::istringstream iss("{\"punter\":0,\n"
                                    "\"punters\":2,\n"
                                    "\"map\":{\"sites\":[{\"id\":4},{\"id\":1},{\"id\":3},{\"id\":6},{\"id\":5},{\"id\":0},{\"id\":7},{\"id\":2}],\n"
@@ -23,12 +23,19 @@ static GameState extractSampleGameStateFromSetupRequest() {
                                    "{\"source\":1,\"target\":7},{\"source\":0,\"target\":7},{\"source\":1,\"target\":2}],\n"
                                    "\"mines\":[1,5]}}");
 
-    json request;
-    iss >> request;
+    OfflineProtocol protocol;
+    return *protocol.extractStateFromSetupRequest(iss).get();
+}
+
+static GameState sparseStateFromSetupRequest() {
+    std::istringstream iss("{\"punter\":0,\n"
+                                   "\"punters\":2,\n"
+                                   "\"map\":{\"sites\":[{\"id\":5},{\"id\":10}],\n"
+                                   "\"rivers\":[{\"source\":5,\"target\":10}],\n"
+                                   "\"mines\":[10]}}");
 
     OfflineProtocol protocol;
-
-    return *protocol.extractStateFromSetupRequest(request).get();
+    return *protocol.extractStateFromSetupRequest(iss).get();
 }
 
 static std::vector<OfflineProtocol::Move> extractSampleMovesFromMoveRequest() {
@@ -46,30 +53,30 @@ static std::vector<OfflineProtocol::Move> extractSampleMovesFromMoveRequest() {
 }
 
 TEST_CASE("Setup Request GameState.getPuntersNum() should return correct value", "[GameState]") {
-    REQUIRE(extractSampleGameStateFromSetupRequest().getPuntersNum() == 2);
+    REQUIRE(sampleStateFromSetupRequest().getPuntersNum() == 2);
 }
 
 TEST_CASE("Setup Request GameState.getSitesNum() should return correct value", "[GameState]") {
-    REQUIRE(extractSampleGameStateFromSetupRequest().getSitesNum() == 8);
+    REQUIRE(sampleStateFromSetupRequest().getSitesNum() == 8);
 }
 
 TEST_CASE("Setup Request GameState.getPunterId() should return correct value", "[GameState]") {
-    REQUIRE(extractSampleGameStateFromSetupRequest().getPunterId() == 0);
+    REQUIRE(sampleStateFromSetupRequest().getPunterId() == 0);
 }
 
 TEST_CASE("Setup Request GameState.isEdge() should return correct value", "[GameState]") {
-    REQUIRE(extractSampleGameStateFromSetupRequest().isEdge(3, 4));
-    REQUIRE(!extractSampleGameStateFromSetupRequest().isEdge(3, 7));
+    REQUIRE(sampleStateFromSetupRequest().isEdge(3, 4));
+    REQUIRE(!sampleStateFromSetupRequest().isEdge(3, 7));
 }
 
 TEST_CASE("Setup Request GameState.isMine() should return correct value", "[GameState]") {
-    REQUIRE(extractSampleGameStateFromSetupRequest().isMine(5));
-    REQUIRE(!extractSampleGameStateFromSetupRequest().isMine(2));
+    REQUIRE(sampleStateFromSetupRequest().isMine(5));
+    REQUIRE(!sampleStateFromSetupRequest().isMine(2));
 }
 
 TEST_CASE("Setup Request GameState serialization") {
     std::ostringstream os;
-    extractSampleGameStateFromSetupRequest().serialize(os);
+    sampleStateFromSetupRequest().serialize(os);
 
     std::string s = os.str();
 
@@ -85,5 +92,20 @@ TEST_CASE("Move Request should extract only claimed edges") {
     REQUIRE(extractSampleMovesFromMoveRequest()[1] == OfflineProtocol::Move(6, 1, 2));
 }
 
-#pragma clang diagnostic pop
+TEST_CASE("Setup Request sparse site ids") {
 
+    GameState state = sparseStateFromSetupRequest();
+
+    REQUIRE(state.toInternalId(5) == 0);
+    REQUIRE(state.toInternalId(10) == 1);
+
+    REQUIRE(state.getSitesNum() == 2);
+
+    REQUIRE(state.getMines().size() == 1);
+    REQUIRE(state.getMines().find(1) != state.getMines().end());
+
+    REQUIRE(state.isEdge(0, 1));
+    REQUIRE(state.isEdge(1, 0));
+}
+
+#pragma clang diagnostic pop

@@ -2,6 +2,7 @@
 #define CW_ICFPC_2017_STATE_H
 
 #include <vector>
+#include <set>
 #include <unordered_set>
 #include <unordered_map>
 #include <iostream>
@@ -21,6 +22,7 @@ const float MINE_POTENTIAL=20;
 struct River {
     vert_t from;
     vert_t to;
+
     River(vert_t from, vert_t to);
 
     bool operator==(const River &rhs) const;
@@ -28,6 +30,7 @@ struct River {
     bool operator!=(const River &rhs) const;
 
     bool isAdjacent(const River &other) const;
+
     bool contains(vert_t v) const;
 
     static const River EMPTY;
@@ -41,21 +44,26 @@ struct IGameUpdater {
 };
 
 // Work around LLDB aggressive
-template class std::vector<vert_t>;
-template class std::unordered_map<vert_t, std::vector<vert_t>>;
+template
+class std::vector<vert_t>;
+
+template
+class std::unordered_map<vert_t, std::vector<vert_t>>;
 
 
 class GameState : public IGameUpdater {
 public:
     GameState();
+
     explicit GameState(std::istream &in);
+
     explicit GameState(std::string json);
 
     void serialize(std::ostream &out) const;
 
     void deserialize(std::istream &in);
 
-    void deserialize(nlohmann::json& state);
+    void deserialize(nlohmann::json &state);
 
     vert_t getSitesNum() const;
 
@@ -95,7 +103,14 @@ public:
 
     void initMinDistances();
 
+    const vert_t toInternalId(vert_t externalId);
+
+    const vert_t toExternalId(vert_t internalId);
+
 private:
+    bool remap_ids;
+    std::vector<vert_t> internal_to_external_id_mapping;
+    std::unordered_map<vert_t, vert_t> external_to_internal_id_mapping;
 
     std::vector<VertexIncidence> incidence_list;
 
@@ -119,48 +134,36 @@ private:
     friend class GameStateBuilder;
 };
 
-std::istream & operator << (std::istream &in, GameState& game);
+std::istream &operator<<(std::istream &in, GameState &game);
 
 class GameStateBuilder {
 private:
-    std::vector<VertexIncidence> incidence_list;
+    std::set<vert_t> sites;
+    std::map<vert_t, VertexIncidence> incidence_map;
     std::unordered_set<vert_t> mines;
     vert_t punter_id = 0;
     vert_t punters_num = 0;
 
 public:
-    std::vector<VertexIncidence> &incidence_list_ref() {
-        return incidence_list;
+    void add_river(vert_t from, vert_t to, punter_t punter);
+
+    std::set<vert_t> &sites_ref() {
+        return sites;
     }
 
     std::unordered_set<vert_t> &mines_ref() {
         return mines;
     }
 
-    vert_t& punter_id_ref() {
+    vert_t &punter_id_ref() {
         return punter_id;
     }
 
-    vert_t& punters_num_ref() {
+    vert_t &punters_num_ref() {
         return punters_num;
     }
 
-    std::unique_ptr<GameState> build() {
-        auto* state = new GameState();
-
-        state->punter_id = punter_id;
-        state->punters_num = punters_num;
-        state->mines = mines;
-        state->incidence_list = incidence_list;
-        // TODO: When we read other player's moves, remove edges from here.
-        // This is already done in gameState::claimEdge(), so it's wise to use it to record moves.
-        state->incidence_available = incidence_list;
-
-        // NO NEED TO DO THIS, we do it on deserialization
-        //state->complementEdges();
-
-        return std::unique_ptr<GameState>(state);
-    }
+    std::unique_ptr<GameState> build();
 };
 
 #endif //CW_ICFPC_2017_STATE_H

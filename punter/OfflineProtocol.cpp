@@ -29,7 +29,10 @@ void OfflineProtocol::handleRequest(std::istream &in, std::ostream &out) {
         std::vector<Move> moves = extractMovesFromMoveRequest(request);
 
         for (auto& move : moves) {
-            state->claimEdge(move.from, move.to, move.punter_id);
+            vert_t from = state->toInternalId(move.from);
+            vert_t to = state->toInternalId(move.to);
+
+            state->claimEdge(from, to, move.punter_id);
         }
 
         // {"claim" : {"punter" : PunterId, "source" : SiteId, "target" : SiteId}}
@@ -61,6 +64,12 @@ void OfflineProtocol::handleRequest(std::istream &in, std::ostream &out) {
 
 }
 
+std::unique_ptr<GameState> OfflineProtocol::extractStateFromSetupRequest(istream &in) {
+    json request;
+    in >> request;
+    return extractStateFromSetupRequest(request);
+}
+
 std::unique_ptr<GameState> OfflineProtocol::extractStateFromSetupRequest(json &setup_request) {
 
     GameStateBuilder builder;
@@ -71,15 +80,10 @@ std::unique_ptr<GameState> OfflineProtocol::extractStateFromSetupRequest(json &s
     if (setup_request["map"].is_object()) {
         json &map = setup_request["map"];
         if (map["sites"].is_array()) {
-            builder.incidence_list_ref().resize(map["sites"].size());
             for (auto &element : map["sites"]) {
                 int id = element["id"];
 
-                // TODO: fix it properly!
-                if(id >= builder.incidence_list_ref().size())
-                    builder.incidence_list_ref().resize(id + 1);
-
-                builder.incidence_list_ref()[id] = VertexIncidence();
+                builder.sites_ref().insert(id);
                 //std::cout << element << '\n';
             }
         }
@@ -89,8 +93,7 @@ std::unique_ptr<GameState> OfflineProtocol::extractStateFromSetupRequest(json &s
                 vert_t source = element["source"];
                 vert_t target = element["target"];
 
-                builder.incidence_list_ref()[source][target] = -1;
-                builder.incidence_list_ref()[target][source] = -1;
+                builder.add_river(source, target, -1);
             }
         }
 
@@ -235,8 +238,9 @@ void OfflineProtocol::writeSetupResponse(std::ostream &out, GameState *state) {
 }
 
 void OfflineProtocol::writeClaimResponse(std::ostream &out, GameState *state, punter_t punterId, vert_t source, vert_t dist) {
-    out << "{\"claim\":{\"punter\":" << punterId << ", \"source\":" << source;
-    out << ", \"target\":" << dist;
+    out << "{\"claim\":{\"punter\":" << punterId;
+    out << ", \"source\":" << state->toExternalId(source);
+    out << ", \"target\":" << state->toExternalId(dist);
     out << "}, \"state\": ";
     state->serialize(out);
     out << "}";
