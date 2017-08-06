@@ -54,7 +54,7 @@ std::string wrap_json(const json& input)
 {
     std::array<char, 12> buffer = {{}};
     std::string input_string = input.dump();
-    sprintf(buffer.data(), "%u:", input_string.size());
+    sprintf(buffer.data(), "%lu:", input_string.size());
     std::string data(buffer.data());
     return data + input_string;
 }
@@ -111,6 +111,7 @@ struct runner_state{
   std::vector<json> m_States;
   std::vector<json> m_Moves;
   //std::vector<std::unique_ptr<GameState>> m_Games;
+  GameState game;
   std::vector<Empire> m_Empires;
   json m_Map;
   int turns;
@@ -128,9 +129,9 @@ struct runner_state{
       // create empire for each punter
       OfflineProtocol protocol;
       json data = create_startup(i, g_Punters, m_Map);
-      auto game = protocol.extractStateFromSetupRequest(data);
-      game->initMinDistances();
-      Empire e(*game, i);
+      game = *protocol.extractStateFromSetupRequest(data);
+      game.initMinDistances();
+      Empire e(game, i);
       m_Empires.push_back(e);
     }
   }
@@ -263,6 +264,10 @@ int main(int argc, char *argv[]) {
     // spread values
     while (g_PunterNames.size() < g_Punters)
       g_PunterNames.push_back(g_PunterNames[g_PunterNames.size()-1]);
+
+    if (g_PunterNames.size() > g_Punters) {
+        g_Punters = g_PunterNames.size();
+    }
     
     std::cout << "Local runner for punters. log punter #" << g_LogPunter << std::endl;
     std::string map = "../maps/";
@@ -288,7 +293,15 @@ int main(int argc, char *argv[]) {
         json test = g_State.create_move_query(punter);
         std::string response = call_punter(punter, test);
         g_State.log(punter, response);
-        g_State.process_response(punter, parse_response(response));
+        try {
+            g_State.process_response(punter, parse_response(response));
+        }
+        catch (std::exception &e) {
+            std::cerr << "Error: '" << e.what() << "' handling response from "
+                      << g_PunterNames[punter] << "[" << punter << "]:'"
+                      << response << "'\n";
+            exit(1);
+        }
     }
     g_State.final_log();
     return 0;
