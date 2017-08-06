@@ -1,5 +1,5 @@
 #include <cassert>
-
+#include <climits>
 #include "GameState.h"
 
 // for convenience
