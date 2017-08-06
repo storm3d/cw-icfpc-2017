@@ -196,7 +196,7 @@ void OfflineProtocol::writeMoveResponseTactic(std::ostream &out, GameState *stat
 
     // potential algorithm
     state->colorOurSites();
-    state->initPotentials(10);
+    state->initPotentials(16);
 
     std::unordered_set<vert_t> froms(state->getOurSites());
     froms.insert(state->getMines().begin(), state->getMines().end());
@@ -205,9 +205,16 @@ void OfflineProtocol::writeMoveResponseTactic(std::ostream &out, GameState *stat
 
     for (auto from : froms) {
         for (auto &edge : state->getEdgesFrom(from)) {
-            if (edge.second == -1 && state->getColors()[from] != state->getColors()[edge.first])
-                fringeEdges.push_back({state->coloredPotentialAt(from)
-                                       + state->coloredPotentialAt(edge.first), from, edge.first});
+            if (edge.second == -1 && state->getColors()[from] != state->getColors()[edge.first]) {
+                potential_t edgePot = state->coloredPotentialAt(from, -1)
+                                      + state->coloredPotentialAt(edge.first, state->getColors()[from]);
+
+                // it mean that we are closing 2 isles or isle and a mine
+                if(state->getColors()[from] && state->getColors()[edge.first])
+                    edgePot *= 10;
+                fringeEdges.push_back({edgePot, from, edge.first});
+
+            }
         }
     }
 

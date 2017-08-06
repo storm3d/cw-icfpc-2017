@@ -414,7 +414,7 @@ void GameState::initPotentials(int depth) {
         for (int i = 0; i < getSitesNum(); i++) {
             for (auto near: incidence_list[i]) {
 
-                if(near.second == -1) {
+                if( near.second == -1 || near.second == punter_id) {
                     new_potential_list[i] += potentialAt(near.first) / 10;
 
                     for(int j = 1; j <= getMinesNum(); j++) {
@@ -467,19 +467,25 @@ void GameState::colorOurSites() {
     }
 }
 
-potential_t GameState::coloredPotentialAt(vert_t i) const {
+potential_t GameState::coloredPotentialAt(vert_t i, int ourColor) const {
     potential_t pot = potential_list[i];
 
     int colorsNum = 0;
     potential_t colorPart = 0;
     for(int j = 1; j <= getMinesNum(); j++) {
+        if(j == ourColor)
+            continue;
+
         colorPart += potential_list[i + j*getSitesNum()];
-        if(j && potential_list[i + j*getSitesNum()])
+        float potential_list[i + j*getSitesNum()];
+        if(potential_list[i + j*getSitesNum()])
             colorsNum++;
     }
-    if(colorsNum) {
-        colorPart*= colorsNum;
-    }
+
+    // TODO: remove?
+    //if(colorsNum) {
+    //    colorPart*= colorsNum;
+    //}
 
     return pot + colorPart;
 }
