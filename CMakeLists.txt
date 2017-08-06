@@ -34,11 +34,15 @@ target_link_libraries(punter-aggro PRIVATE)
 target_compile_definitions(punter-aggro PRIVATE SOLVER_AGGREGATE=1)
 
 set(SOURCE_FILES punter2/punter2.cpp)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 add_executable(punter2 ${SOURCE_FILES})
 target_link_libraries(punter2 PRIVATE)
 
-set(SOURCE_FILES local_runner/local_runner.cpp)
+set(SOURCE_FILES local_runner/local_runner.cpp
+		model/GameState.cpp
+		model/Empire.cpp
+		solver/Solver.cpp
+		punter/OfflineProtocol.cpp
+		)
 add_executable(local_runner ${SOURCE_FILES})
 
 set(SOURCE_FILES
