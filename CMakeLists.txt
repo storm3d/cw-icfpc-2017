@@ -7,7 +7,6 @@ include_directories(model solver)
 set(CMAKE_CXX_STANDARD 11)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
-
 set(SOURCE_FILES
 		punter/punter.cpp
 		model/GameState.cpp

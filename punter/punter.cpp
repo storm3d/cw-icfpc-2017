@@ -17,12 +17,12 @@ string readJson()
 
     cin.ignore(1);
 
-    cerr << "FOUND JSON SIZE: " << jsonLength << endl;
+    //cerr << "FOUND JSON SIZE: " << jsonLength << endl;
 
     string jsonStr(jsonLength, ' ');
     cin.read(&jsonStr[0], jsonLength);
 
-    cerr << jsonStr << endl;
+    //cerr << jsonStr << endl;
 
     return jsonStr;
 }
@@ -48,6 +48,8 @@ int main( int argc, char* argv[] ) {
     //cerr << endl << "reading 2nd json" << endl;
     string payload = readJson();
 
+    cerr << endl << "in:" << endl << payload << endl;
+
     //cerr << endl << "generating next move" << endl;
 
     OfflineProtocol offlineProtocol;
@@ -57,7 +59,7 @@ int main( int argc, char* argv[] ) {
     offlineProtocol.handleRequest(iss, oss);
 
     //cerr << endl << "writing response: " << endl;
-    cerr <<oss.str().size()<<":"<<oss.str()<<std::endl;
+    cerr << "out: " << endl << oss.str() << std::endl;
 
     std::cout<<oss.str().size()<<":"<<oss.str();
     //cerr << endl << "move written! " << endl;

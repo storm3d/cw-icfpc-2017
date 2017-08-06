@@ -1,6 +1,7 @@
 
 #include <queue>
 #include "OfflineProtocol.h"
+using namespace std;
 
 void OfflineProtocol::handleRequest(std::istream &in, std::ostream &out) {
     json request;
@@ -42,7 +43,14 @@ void OfflineProtocol::handleRequest(std::istream &in, std::ostream &out) {
 
         std::unique_ptr<GameState> state = extractStateFromMoveRequest(request);
         std::vector<int> scores = extractScoresFromStopRequest(request);
-        std::cerr << "OUR SCORE: " << scores[state->getPunterId()] << std::endl;
+
+        std::cerr << endl << "SCORES: ";
+
+        for (auto& i : scores) {
+            std::cerr  << i << ", ";
+        }
+        std::cerr << endl << "OUR SCORE: " << scores[state->getPunterId()] << std::endl;
+        std::cerr << endl << "FINISHED IN : " << state->getCurrentTurnNum() << " TURNS" << std::endl;
     }
 
 }
@@ -60,6 +68,10 @@ std::unique_ptr<GameState> OfflineProtocol::extractStateFromSetupRequest(json &s
             builder.incidence_list_ref().resize(map["sites"].size());
             for (auto &element : map["sites"]) {
                 int id = element["id"];
+
+                // TODO: fix it properly!
+                if(id >= builder.incidence_list_ref().size())
+                    builder.incidence_list_ref().resize(id + 1);
 
                 builder.incidence_list_ref()[id] = VertexIncidence();
                 //std::cout << element << '\n';
@@ -134,6 +146,7 @@ void OfflineProtocol::writeMoveResponse(std::ostream &out, GameState *state) {
 
     // rough algo
     std::queue<punter_t> wave;
+    std::unordered_set<punter_t> forbidden;
 
     // occupy mines first
     for (auto& mine : state->getMines()) {
@@ -147,10 +160,11 @@ void OfflineProtocol::writeMoveResponse(std::ostream &out, GameState *state) {
                 out << "}";
                 return;
             }
-            else if(edge.second == state->getPunterId()) {
+            else if(edge.second == state->getPunterId() && forbidden.find(edge.first) != forbidden.end()) {
                 wave.push(edge.first);
             }
         }
+        forbidden.insert(mine);
     }
 
     // try to occupy sites
@@ -166,11 +180,12 @@ void OfflineProtocol::writeMoveResponse(std::ostream &out, GameState *state) {
                 state->serialize(out);
                 out << "}";
                 return;
-            } else if (edge.second == state->getPunterId()) {
+            } else if (edge.second == state->getPunterId() && forbidden.find(edge.first) != forbidden.end()) {
                 wave.push(edge.first);
             }
         }
         wave.pop();
+        forbidden.insert(site);
 
     }
 

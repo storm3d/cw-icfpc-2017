@@ -39,7 +39,7 @@ bool River::contains(vert_t v) const {
     return from == v || to == v;
 }
 
-GameState::GameState() {
+GameState::GameState() : currentTurn(0) {
 }
 
 GameState::GameState(std::istream &in) {
@@ -55,6 +55,7 @@ GameState::GameState(std::string json) {
 void GameState::serialize(std::ostream &out) const {
 
     out << "{\"punter\":" << punter_id << ','
+        << "\"turn\":" << currentTurn << ','
         << "\"punters\":" << punters_num << ','
         << "\"map\": {";
 
@@ -110,11 +111,13 @@ void GameState::deserialize(std::istream &in) {
     deserialize(j);
 }
 
-void GameState::deserialize(json& state) {
-    cerr << "GameState::deserialize" << endl;
+void GameState::deserialize(nlohmann::json& state) {
+    //cerr << "GameState::deserialize" << endl;
 
     punters_num = state["punters"];
     punter_id = state["punter"];
+    currentTurn = state["turn"];
+    currentTurn++;
 
     if(state["map"].is_object())
     {

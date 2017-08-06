@@ -1,4 +1,4 @@
 cmake .
 make
-rm ./err.log
-./lamduct-0.3 --game-port 9048 --log-level 2 --client-instance-logfile err.log ./bin/punter
+rm ./log.json
+./lamduct-0.3 --game-port 9190 --log-level 1 --client-instance-logfile log.json ./bin/punter
