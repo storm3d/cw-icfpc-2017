@@ -425,7 +425,7 @@ void GameState::initPotentials(int depth) {
             for (auto near: incidence_list[i]) {
 
                 if (near.second == -1 || near.second == punter_id) {
-                    new_potential_list[i] += potentialAt(near.first) / 10;
+                    new_potential_list[i] = max(new_potential_list[i], potentialAt(near.first) / 10);
 
                     for (int j = 1; j <= getMinesNum(); j++) {
 //                        new_potential_list[i + j*getSitesNum()] += potentialAt(near.first + j*getSitesNum()) / 10;
@@ -483,13 +483,11 @@ potential_t GameState::coloredPotentialAt(vert_t i, int curr_color) const {
     potential_t pot = potential_list[i] / 1000;
 //    potential_t pot = 0;
 
-    if (site_colors[i] == curr_color)
-        return pot;
-
     int colorsNum = 0;
     potential_t colorPart = 0;
     for (int j = 1; j <= getMinesNum(); j++) {
-        colorPart += potential_list[i + j * getSitesNum()];
+        if (j != curr_color)
+            colorPart += potential_list[i + j * getSitesNum()];
     }
 
     return pot + colorPart;
