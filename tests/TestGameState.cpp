@@ -144,12 +144,16 @@ static void make_step(GameState& state, int step_number) {
     auto edges = state.getMostPotentialEdge();
     for (auto& edge : edges)
         std::cout << "from: " << edge.from << ", to: " << edge.to << ", pot: " << edge.pot << std::endl;
+
+    for (vert_t i = 0; i < state.getSitesNum(); i++)
+        std::cout << "Vertex " << i <<" potential: " << state.coloredPotentialAt(i, -1) << std::endl;
+
     state.claimEdge(edges[0].from, edges[0].to, state.getPunterId());
 }
 
 TEST_CASE("Potential edges - diamond map") {
     //    / s1 \
-    // m0      m3
+    // m0   |  m3
     //   \ s2 /
 
     GameStateBuilder builder;
@@ -164,6 +168,7 @@ TEST_CASE("Potential edges - diamond map") {
 
     builder.add_river(0, 1, -1);
     builder.add_river(0, 2, -1);
+    builder.add_river(1, 2, -1);
     builder.add_river(3, 1, -1);
     builder.add_river(3, 2, -1);
 
