@@ -36,7 +36,11 @@ public:
 
     void writeSetupResponse(std::ostream &out, GameState *state);
 
-    void writeMoveResponse(std::ostream &out, GameState *state);
+    void writeMoveResponseGreedy(std::ostream &out, GameState *state);
+    void writeMoveResponseTactic(std::ostream &out, GameState *state);
+
+    void writeClaimResponse(std::ostream &out, GameState *state, punter_t punterId, vert_t source, vert_t dist);
+    void writePassResponse(std::ostream &out, GameState *state, punter_t punterId);
 };
 
 bool operator==(const OfflineProtocol::Move& lhs, const OfflineProtocol::Move& rhs);

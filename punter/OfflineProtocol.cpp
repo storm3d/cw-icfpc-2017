@@ -35,7 +35,7 @@ void OfflineProtocol::handleRequest(std::istream &in, std::ostream &out) {
 
         // {"claim" : {"punter" : PunterId, "source" : SiteId, "target" : SiteId}}
         // {"state" : state}
-        writeMoveResponse(out, state.get());
+        writeMoveResponseTactic(out, state.get());
 
     } else if (request.find("stop") != request.end()) {
         // stop request
@@ -136,13 +136,7 @@ std::vector<int> OfflineProtocol::extractScoresFromStopRequest(json &stop_reques
     return scores;
 }
 
-void OfflineProtocol::writeSetupResponse(std::ostream &out, GameState *state) {
-    out << "{\"ready\":" << state->getPunterId() << ",\"state\":";
-    state->serialize(out);
-    out << "}";
-}
-
-void OfflineProtocol::writeMoveResponse(std::ostream &out, GameState *state) {
+void OfflineProtocol::writeMoveResponseGreedy(std::ostream &out, GameState *state) {
 
     // rough algo
     std::queue<punter_t> wave;
@@ -152,58 +146,87 @@ void OfflineProtocol::writeMoveResponse(std::ostream &out, GameState *state) {
     for (auto& mine : state->getMines()) {
         for (auto& edge : state->getEdgesFrom(mine)) {
             if(edge.second == -1) {
-
-                out << "{\"claim\":{\"punter\":" << state->getPunterId() << ", \"source\":" << mine;
-                out << ", \"target\":" << edge.first;
-                out << "}, \"state\": ";
-                state->serialize(out);
-                out << "}";
+                writeClaimResponse(out, state, state->getPunterId(), mine, edge.first);
                 return;
             }
-            else if(edge.second == state->getPunterId() && forbidden.find(edge.first) != forbidden.end()) {
+            else if(edge.second == state->getPunterId() && forbidden.find(edge.first) == forbidden.end()) {
                 wave.push(edge.first);
             }
         }
         forbidden.insert(mine);
     }
 
-    // try to occupy sites
+    // try to occupy sites adjacent to our already occupied
     while (!wave.empty())
     {
         int site = wave.front();
         for (auto& edge : state->getEdgesFrom(site)) {
             if (edge.second == -1) {
-
-                out << "{\"claim\":{\"punter\":" << state->getPunterId() << ", \"source\":" << site;
-                out << ", \"target\":" << edge.first;
-                out << "}, \"state\": ";
-                state->serialize(out);
-                out << "}";
+                writeClaimResponse(out, state, state->getPunterId(), site, edge.first);
                 return;
-            } else if (edge.second == state->getPunterId() && forbidden.find(edge.first) != forbidden.end()) {
+            } else if (edge.second == state->getPunterId() && forbidden.find(edge.first) == forbidden.end()) {
                 wave.push(edge.first);
             }
         }
         wave.pop();
         forbidden.insert(site);
-
     }
 
-    /*
-    for (auto site = 0; site < state->getSitesNum(); site++) {
-        for (auto& edge : state->getEdgesFrom(site)) {
-            if(edge.second == -1) {
+    writePassResponse(out, state, state->getPunterId());
+}
 
-                out << "{\"claim\":{\"punter\":" << state->getPunterId() << ", \"source\":" << site;
-                out << ", \"target\":" << edge.first;
-                out << "}, \"state\": ";
-                state->serialize(out);
-                out << "}";
-                return;
-            }}
-    }*/
+struct PotentialEdge {
+    potential_t  pot;
+    vert_t from;
+    vert_t to;
+};
 
-    out << "{\"pass\":{\"punter\":" << state->getPunterId();
+inline bool operator< (const PotentialEdge& lhs, const PotentialEdge& rhs){ return lhs.pot>rhs.pot; }
+
+void OfflineProtocol::writeMoveResponseTactic(std::ostream &out, GameState *state) {
+
+    // potential algorithm
+    state->initPotentials(1);
+
+    std::unordered_set<vert_t> froms(state->getOurSites());
+    froms.insert(state->getMines().begin(), state->getMines().end());
+
+    vector<PotentialEdge> fringeEdges;
+
+    for (auto from : froms) {
+        for (auto &edge : state->getEdgesFrom(from)) {
+            if (edge.second == -1)
+                fringeEdges.push_back({state->getPotentials()[from]
+                                       + state->getPotentials()[edge.first], from, edge.first});
+        }
+    }
+
+    std::sort (fringeEdges.begin(), fringeEdges.end());
+
+    if(fringeEdges.size()) {
+        writeClaimResponse(out, state, state->getPunterId(), fringeEdges[0].from, fringeEdges[0].to);
+        return;
+    }
+
+    writePassResponse(out, state, state->getPunterId());
+}
+
+void OfflineProtocol::writeSetupResponse(std::ostream &out, GameState *state) {
+    out << "{\"ready\":" << state->getPunterId() << ",\"state\":";
+    state->serialize(out);
+    out << "}";
+}
+
+void OfflineProtocol::writeClaimResponse(std::ostream &out, GameState *state, punter_t punterId, vert_t source, vert_t dist) {
+    out << "{\"claim\":{\"punter\":" << punterId << ", \"source\":" << source;
+    out << ", \"target\":" << dist;
+    out << "}, \"state\": ";
+    state->serialize(out);
+    out << "}";
+}
+
+void OfflineProtocol::writePassResponse(std::ostream &out, GameState *state, punter_t punterId) {
+    out << "{\"pass\":{\"punter\":" << punterId;
     out << "}, \"state\": ";
     state->serialize(out);
     out << "}";

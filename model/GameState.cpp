@@ -225,6 +225,11 @@ void GameState::claimEdge(vert_t from, vert_t to, punter_t punter)  {
         to = tmp;
     }
 
+    if(punter == punter_id) {
+        our_sites.insert(from);
+        our_sites.insert(to);
+    }
+
     assert(to < incidence_list.size());
 
     auto it = incidence_list[from].find(to);
@@ -306,5 +311,28 @@ void GameState::initMinDistances()
                 }
             }
         }
+    }
+}
+
+void GameState::initPotentials(int depth) {
+
+    potential_list.resize(getSitesNum(), 0);
+    for(int i = 0; i < getSitesNum(); i++) {
+        potential_t pot = incidence_list[i].size();
+        if(isMine(i))
+            pot+= MINE_POTENTIAL;
+        potentialAt(i) = pot;
+        //cerr << "pot[" << i << "]=" << pot << endl;
+    }
+
+    // propagate
+    for(int i = 0; i < 3; i++) {
+        std::vector<potential_t> new_potential_list(potential_list);
+        for (int i = 0; i < getSitesNum(); i++) {
+            for (auto near: incidence_list[i]) {
+                new_potential_list[i] += potentialAt(near.first) / 100;
+            }
+        }
+        potential_list = new_potential_list;
     }
 }

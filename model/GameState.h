@@ -10,10 +10,13 @@
 
 #include <json.hpp>
 
-typedef uint64_t vert_t;
-typedef int64_t punter_t;
+typedef int vert_t;
+typedef int punter_t;
+typedef float potential_t;
 
 typedef std::unordered_map<vert_t, punter_t> VertexIncidence;
+
+const float MINE_POTENTIAL=20;
 
 struct River {
     vert_t from;
@@ -72,6 +75,12 @@ public:
 
     bool isMine(vert_t i) const;
 
+    potential_t &potentialAt(vert_t i) {return potential_list[i];}
+
+    void initPotentials(int depth);
+    const std::vector<potential_t> &getPotentials() const {return potential_list;}
+    const std::unordered_set<vert_t> &getOurSites() const {return our_sites;}
+
     // Whoopsie, I'm exposing implementation.
     const std::unordered_set<vert_t> &getMines() const;
 
@@ -94,6 +103,9 @@ private:
     std::vector<VertexIncidence> incidence_available;
 
     std::unordered_set<vert_t> mines;
+
+    std::vector<potential_t> potential_list;
+    std::unordered_set<vert_t> our_sites;
 
     vert_t punters_num = 0;
 
