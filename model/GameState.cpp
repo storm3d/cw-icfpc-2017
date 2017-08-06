@@ -8,7 +8,7 @@
 using json = nlohmann::json;
 using namespace std;
 
-const float MINE_POTENTIAL=100;
+const float MINE_POTENTIAL = 100;
 
 const River River::EMPTY = River(0, 0);
 
@@ -409,23 +409,28 @@ void GameState::initPotentials(int depth) {
         potential_t pot = incidence_list[i].size();
         potentialAt(i) = pot; // number of free edges???
 
-        if(site_colors[i])
-            potentialAt(i + site_colors[i]*getSitesNum()) = MINE_POTENTIAL;
+        if (site_colors[i])
+            potentialAt(i + site_colors[i] * getSitesNum()) = MINE_POTENTIAL;
 
         //cerr << "pot[" << i << "]=" << pot << endl;
     }
 
     // propagate
-    for(int i = 0; i < depth; i++) {
+    for (int i = 0; i < depth; i++) {
         std::vector<potential_t> new_potential_list(potential_list);
+//        for (int k = 0; k < new_potential_list.size(); k++)
+//            new_potential_list[k] *= 1.1;
+
         for (int i = 0; i < getSitesNum(); i++) {
             for (auto near: incidence_list[i]) {
 
-                if(near.second == -1 || near.second == punter_id) {
+                if (near.second == -1 || near.second == punter_id) {
                     new_potential_list[i] += potentialAt(near.first) / 10;
 
-                    for(int j = 1; j <= getMinesNum(); j++) {
-                        new_potential_list[i + j*getSitesNum()] += potentialAt(near.first + j*getSitesNum()) / 10;
+                    for (int j = 1; j <= getMinesNum(); j++) {
+//                        new_potential_list[i + j*getSitesNum()] += potentialAt(near.first + j*getSitesNum()) / 10;
+                        new_potential_list[i + j * getSitesNum()] =
+                                max(new_potential_list[i + j * getSitesNum()], potentialAt(near.first + j * getSitesNum()) / 10);
                     }
                 }
 //                else if(near.second == punter_id)
@@ -440,20 +445,20 @@ void GameState::colorOurSites() {
 
     site_colors.resize(getSitesNum(), 0);
     int color = 1;
-    for(auto mine: getMines()) {
+    for (auto mine: getMines()) {
         site_colors[mine] = color++;
     }
 
     // color each cluster
-    for(auto mine: getMines()) {
+    for (auto mine: getMines()) {
         int color = site_colors[mine];
         std::queue<vert_t> wave;
         wave.push(mine);
 
-        while(wave.size()) {
+        while (wave.size()) {
             auto cur = wave.front();
-            for(auto edge : getEdgesFrom(cur)) {
-                if(edge.second != punter_id || site_colors[edge.first] == color)
+            for (auto edge : getEdgesFrom(cur)) {
+                if (edge.second != punter_id || site_colors[edge.first] == color)
                     continue;
                 wave.push(edge.first);
 
@@ -475,7 +480,7 @@ void GameState::colorOurSites() {
 }
 
 potential_t GameState::coloredPotentialAt(vert_t i, int curr_color) const {
-    potential_t pot = potential_list[i];
+    potential_t pot = potential_list[i] / 1000;
 //    potential_t pot = 0;
 
     if (site_colors[i] == curr_color)
@@ -483,8 +488,8 @@ potential_t GameState::coloredPotentialAt(vert_t i, int curr_color) const {
 
     int colorsNum = 0;
     potential_t colorPart = 0;
-    for(int j = 1; j <= getMinesNum(); j++) {
-        colorPart += potential_list[i + j*getSitesNum()];
+    for (int j = 1; j <= getMinesNum(); j++) {
+        colorPart += potential_list[i + j * getSitesNum()];
     }
 
     return pot + colorPart;
