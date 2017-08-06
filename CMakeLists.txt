@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.8)
 project(cw_icfpc_2017)
 
 include_directories(include SYSTEM)
+include_directories(model solver)
 
 set(CMAKE_CXX_STANDARD 11)
 
@@ -12,8 +13,8 @@ set(SOURCE_FILES
 		model/GameState.cpp
 		model/Dijkstra.cpp
 		model/GameState.h
-		model/Solver.cpp
-		model/Solver.h
+		solver/Solver.cpp
+		solver/Solver.h
 		model/Empire.cpp
 		model/Empire.h
 		punter/OfflineProtocol.cpp
@@ -38,7 +39,7 @@ set(SOURCE_FILES
 		punter/OfflineProtocol.cpp
 		punter/OfflineProtocol.h
 		tests/OfflineProtocolTest.cpp
-		model/Solver.cpp
+		solver/Solver.cpp
 		model/Empire.cpp
 		model/Empire.h
 		tests/SolverTests.cpp

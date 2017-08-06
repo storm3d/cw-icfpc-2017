@@ -47,6 +47,15 @@ score_t Empire::getScore() const {
     return result;
 }
 
+const Component *Empire::getByVertex(vert_t vertex) const {
+    for (const Component &c : components) {
+        if (c.getVertices().find(vertex) != c.getVertices().end()) {
+            return &c;
+        }
+    }
+    return NULL;
+}
+
 Component::Component(const GameState *game, vert_t punterId) : game(game), score(0) {
     for (vert_t v = 0; v < game->getSitesNum(); v++) {
         for (auto river_from_v : game->getEdgesFrom(v)) {
@@ -137,4 +146,8 @@ long Component::distanceTo(const Component &other) const {
 
 const std::vector<River> &Component::getRivers() const {
     return rivers;
+}
+
+const std::unordered_set<vert_t> &Component::getVertices() const {
+    return vertices;
 }

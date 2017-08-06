@@ -12,7 +12,7 @@ const River River::EMPTY = River(0, 0);
 
 River::River(vert_t from_, vert_t to_)
 {
-    if (from > to) {
+    if (from_ > to_) {
         from = to_;
         to = from_;
     } else {

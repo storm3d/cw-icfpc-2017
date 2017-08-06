@@ -14,6 +14,10 @@ private:
     score_t score;
     const GameState *game;
     std::unordered_set<vert_t> vertices;
+public:
+    const std::unordered_set<vert_t> &getVertices() const;
+
+private:
     std::vector<River> rivers;
 
     void recalculateScore();
@@ -49,6 +53,7 @@ public:
 
     // ALL the player's paths.
     const std::vector<Component> & getComponents() const;
+    const Component *getByVertex(vert_t vertex) const;
 
     score_t getScore() const;
 };
