@@ -139,4 +139,39 @@ TEST_CASE("GameState::initMinDistances") {
     REQUIRE(game.getMinDistances().at(6).at(2) == 3);
 }
 
+static void make_step(GameState& state, int step_number) {
+    std::cout << std::endl << "Step " << step_number << std::endl;
+    auto edges = state.getMostPotentialEdge();
+    for (auto& edge : edges)
+        std::cout << "from: " << edge.from << ", to: " << edge.to << ", pot: " << edge.pot << std::endl;
+    state.claimEdge(edges[0].from, edges[0].to, state.getPunterId());
+}
+
+TEST_CASE("Potential edges - diamond map") {
+    //    / s1 \
+    // m0      m3
+    //   \ s2 /
+
+    GameStateBuilder builder;
+
+    builder.sites_ref().insert(0);
+    builder.sites_ref().insert(1);
+    builder.sites_ref().insert(2);
+    builder.sites_ref().insert(3);
+
+    builder.mines_ref().insert(0);
+    builder.mines_ref().insert(3);
+
+    builder.add_river(0, 1, -1);
+    builder.add_river(0, 2, -1);
+    builder.add_river(3, 1, -1);
+    builder.add_river(3, 2, -1);
+
+    auto state = builder.build();
+
+    make_step(*state, 1);
+    make_step(*state, 2);
+    make_step(*state, 3);
+}
+
 #pragma clang diagnostic pop

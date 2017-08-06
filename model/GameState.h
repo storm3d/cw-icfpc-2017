@@ -17,8 +17,6 @@ typedef float potential_t;
 
 typedef std::unordered_map<vert_t, punter_t> VertexIncidence;
 
-const float MINE_POTENTIAL=10;
-
 struct River {
     vert_t from;
     vert_t to;
@@ -35,6 +33,14 @@ struct River {
 
     static const River EMPTY;
 };
+
+struct PotentialEdge {
+    potential_t  pot;
+    vert_t from;
+    vert_t to;
+};
+
+inline bool operator< (const PotentialEdge& lhs, const PotentialEdge& rhs){ return lhs.pot>rhs.pot; }
 
 /**
  * A bit ugly way to keep all the
@@ -84,7 +90,8 @@ public:
     bool isMine(vert_t i) const;
 
     potential_t &potentialAt(vert_t i) {return potential_list[i];}
-    potential_t coloredPotentialAt(vert_t i) const;
+    potential_t coloredPotentialAt(vert_t i, int curr_color) const;
+    std::vector<PotentialEdge> getMostPotentialEdge();
 
     void initPotentials(int depth);
     void colorOurSites();

@@ -8,6 +8,8 @@
 using json = nlohmann::json;
 using namespace std;
 
+const float MINE_POTENTIAL=100;
+
 const River River::EMPTY = River(0, 0);
 
 River::River(vert_t from_, vert_t to_) {
@@ -136,7 +138,6 @@ void GameState::deserialize(nlohmann::json &state) {
                 int id = element["id"];
 
                 incidence_list[id] = VertexIncidence();
-                //std::cout << element << '\n';
             }
         }
 
@@ -397,10 +398,11 @@ std::unique_ptr<GameState> GameStateBuilder::build() {
 
 void GameState::initPotentials(int depth) {
 
+    std::fill(potential_list.begin(), potential_list.end(), 0);
     potential_list.resize(getSitesNum() * (1 + getMinesNum()), 0);
     for (int i = 0; i < getSitesNum(); i++) {
         potential_t pot = incidence_list[i].size();
-        potentialAt(i) = pot;
+        potentialAt(i) = pot; // number of free edges???
 
         if(site_colors[i])
             potentialAt(i + site_colors[i]*getSitesNum()) = MINE_POTENTIAL;
@@ -414,7 +416,7 @@ void GameState::initPotentials(int depth) {
         for (int i = 0; i < getSitesNum(); i++) {
             for (auto near: incidence_list[i]) {
 
-                if(near.second == -1) {
+                if(near.second == -1 || near.second == punter_id) {
                     new_potential_list[i] += potentialAt(near.first) / 10;
 
                     for(int j = 1; j <= getMinesNum(); j++) {
@@ -467,19 +469,47 @@ void GameState::colorOurSites() {
     }
 }
 
-potential_t GameState::coloredPotentialAt(vert_t i) const {
+potential_t GameState::coloredPotentialAt(vert_t i, int curr_color) const {
     potential_t pot = potential_list[i];
+//    potential_t pot = 0;
+
+    if (site_colors[i] == curr_color)
+        return pot;
 
     int colorsNum = 0;
     potential_t colorPart = 0;
     for(int j = 1; j <= getMinesNum(); j++) {
         colorPart += potential_list[i + j*getSitesNum()];
-        if(j && potential_list[i + j*getSitesNum()])
-            colorsNum++;
-    }
-    if(colorsNum) {
-        colorPart*= colorsNum;
     }
 
     return pot + colorPart;
+}
+
+std::vector<PotentialEdge> GameState::getMostPotentialEdge() {
+// potential algorithm
+    colorOurSites();
+    initPotentials(10);
+
+    std::unordered_set<vert_t> froms(getOurSites());
+    froms.insert(getMines().begin(), getMines().end());
+
+    vector<PotentialEdge> fringeEdges;
+
+    for (auto from : froms) {
+        for (auto &edge : getEdgesFrom(from)) {
+            auto to = edge.first;
+
+            int from_color = getColors()[from];
+            int to_color = getColors()[from];
+
+            if (edge.second == -1 && from_color != getColors()[to])
+//                fringeEdges.push_back({coloredPotentialAt(to, to_color), from, to});
+                fringeEdges.push_back({coloredPotentialAt(from, to_color)
+                                       + coloredPotentialAt(to, from_color), from, to});
+        }
+    }
+
+    std::sort(fringeEdges.begin(), fringeEdges.end());
+
+    return fringeEdges;
 }

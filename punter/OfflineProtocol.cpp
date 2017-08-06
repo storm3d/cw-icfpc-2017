@@ -84,7 +84,6 @@ std::unique_ptr<GameState> OfflineProtocol::extractStateFromSetupRequest(json &s
                 int id = element["id"];
 
                 builder.sites_ref().insert(id);
-                //std::cout << element << '\n';
             }
         }
 
@@ -184,37 +183,12 @@ void OfflineProtocol::writeMoveResponseGreedy(std::ostream &out, GameState *stat
     writePassResponse(out, state, state->getPunterId());
 }
 
-struct PotentialEdge {
-    potential_t  pot;
-    vert_t from;
-    vert_t to;
-};
-
-inline bool operator< (const PotentialEdge& lhs, const PotentialEdge& rhs){ return lhs.pot>rhs.pot; }
-
 void OfflineProtocol::writeMoveResponseTactic(std::ostream &out, GameState *state) {
 
-    // potential algorithm
-    state->colorOurSites();
-    state->initPotentials(10);
+    std::vector<PotentialEdge> edges = state->getMostPotentialEdge();
 
-    std::unordered_set<vert_t> froms(state->getOurSites());
-    froms.insert(state->getMines().begin(), state->getMines().end());
-
-    vector<PotentialEdge> fringeEdges;
-
-    for (auto from : froms) {
-        for (auto &edge : state->getEdgesFrom(from)) {
-            if (edge.second == -1 && state->getColors()[from] != state->getColors()[edge.first])
-                fringeEdges.push_back({state->coloredPotentialAt(from)
-                                       + state->coloredPotentialAt(edge.first), from, edge.first});
-        }
-    }
-
-    std::sort (fringeEdges.begin(), fringeEdges.end());
-
-    if(fringeEdges.size()) {
-        writeClaimResponse(out, state, state->getPunterId(), fringeEdges[0].from, fringeEdges[0].to);
+    if (edges.size() > 0) {
+        writeClaimResponse(out, state, state->getPunterId(), edges[0].from, edges[0].to);
         return;
     }
 
@@ -227,9 +201,9 @@ void OfflineProtocol::writeMoveResponseTactic(std::ostream &out, GameState *stat
             if(vi.second == -1) {
                 writeClaimResponse(out, state, state->getPunterId(), v1, vi.first);
                 return;
-            }}
-
+            }
         }
+    }
 
     writePassResponse(out, state, state->getPunterId());
 }
