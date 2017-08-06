@@ -510,7 +510,7 @@ std::vector<PotentialEdge> GameState::getMostPotentialEdge() {
             auto to = edge.first;
 
             int from_color = getColors()[from];
-            int to_color = getColors()[from];
+            int to_color = getColors()[to];
 
             if (edge.second == -1 && from_color != getColors()[to])
 //                fringeEdges.push_back({coloredPotentialAt(to, to_color), from, to});
