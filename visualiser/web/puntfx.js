@@ -113,13 +113,19 @@ function writeLog(msg) {
   return;
 }
 
-function rmLastFromLog() {
+function rmLastFromLog(n) {
   const id = 'log';
   const separator = "\n";
   const logEl = document.getElementById(id);
   const logItems = logEl.innerHTML.split(separator);
 
-  logEl.innerHTML = logItems.slice(0, -2).join(separator) + separator;
+  if (n === 'all') {
+    logEl.innerHTML = '';
+  } else if (n === undefined) {
+    logEl.innerHTML = logItems.slice(0, -2).join(separator) + separator;
+  } else {
+    logEl.innerHTML = logItems.slice(0, -n).join(separator) + separator;
+  }
 
   return;
 }

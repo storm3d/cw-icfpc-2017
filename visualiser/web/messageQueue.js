@@ -1,9 +1,9 @@
 let paused = false;
 let timeoutId;
 let isMessageProcessing = false;
+let processedMessages = [];
+let queuedMessages = [];
 
-const processedMessages = [];
-const queuedMessages = [];
 const freeEdgeColor = '#009';
 
 const pause = () => {
@@ -36,6 +36,16 @@ const next = () => {
   }
 
   handleOneMessageFromQueue();
+};
+
+const rewind = () => {
+  pause();
+  _disconnect();
+  processedMessages = [];
+  queuedMessages = [];
+  rmLastFromLog('all');
+  _connect();
+  resume();
 };
 
 const undo = (message) => {
@@ -110,3 +120,4 @@ handleMessageQueue();
 $('#pause').click(() => (paused === true) ? resume() : pause());
 $('#prev').click(prev);
 $('#next').click(next);
+$('#rewind').click(rewind);
