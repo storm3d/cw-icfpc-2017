@@ -12,6 +12,7 @@ std::vector<std::string> g_PunterNames = {};
 std::string g_MapName = "sample";
 int g_Punters = 0;
 int g_LogPunter = 0;
+int g_LogState = 0;
 
 json read_file(const std::string & filename)
 {
@@ -170,7 +171,7 @@ struct runner_state{
       if (punter == g_LogPunter)
       {
         json log_move = create_move_query(g_LogPunter);
-        log_move["state"] = "###";
+        if (!g_LogState) log_move["state"] = "###";
         std::cout<<"in:"<<std::endl<<log_move.dump()<<std::endl;
       }
     }
@@ -194,7 +195,7 @@ struct runner_state{
 
     json log_stop;
     log_stop["stop"] = create_move_query(g_LogPunter)["move"];
-    log_stop["state"] = "###";
+    if (!g_LogState) log_stop["state"] = "###";
     std::cout<<"in:"<<std::endl<<log_stop.dump()<<std::endl;
 
     std::cout<<std::endl<<"SCORES:";
@@ -209,7 +210,7 @@ struct runner_state{
 
 int main(int argc, char *argv[]) {
       int opt;
-      while ((opt = getopt(argc, argv, "p:m:n:l:")) != -1) {
+      while ((opt = getopt(argc, argv, "p:m:n:l:s")) != -1) {
         switch (opt) {
         case 'p':
             g_PunterNames.push_back(optarg);
@@ -223,8 +224,16 @@ int main(int argc, char *argv[]) {
         case 'l':
             g_LogPunter = atoi(optarg);
             break;
+        case 's':
+            g_LogState = 1;
+            break;
         default: /* '?' */
-            fprintf(stderr, "Usage: %s [-l log_punter] [-m g_MapName] [-n punters] [-p punter_name]\n",
+            fprintf(stderr, "Usage: %s [-s] [-l log_punter] [-m map_name] [-n punters] [-p punter_name]\n"
+            "\t-s             : preserve actual state in log. by default state is printed as '###' to shorten logs\n"
+            "\t-l log_punter  : index of punter that will be logged. 0 by default\n"
+            "\t-m map_name    : name of map file from 'maps/' folder w/o extension \n\t\t\t(i.e. tube, circle, boston-sparse, etc). 'sample' by default\n"
+            "\t-n punters     : total number of punters. Must be greater than 1. 2 by default\n"
+            "\t-p punter_name : name of punter executable (w/o '.exe' on windows). You can set several different punters.\n\t\t\tI.e. '-p punter1 -p punter2 ...'. runner will call 'punter' by default.",
                     argv[0]);
             exit(EXIT_FAILURE);
         }
@@ -254,7 +263,7 @@ int main(int argc, char *argv[]) {
     {
       json test = create_startup(i, g_Punters, map_data);
       std::string response = call_punter(i, test);
-      g_State.log(-i, response);
+      g_State.log(-1, response);
       g_State.process_response(i, parse_response(response));
     }
 
