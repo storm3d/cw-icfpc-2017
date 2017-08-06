@@ -1,4 +1,5 @@
 #include <cassert>
+#include <climits>
 #include "Empire.h"
 
 Empire::Empire(GameState &game_, punter_t punterId)
