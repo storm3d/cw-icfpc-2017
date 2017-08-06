@@ -151,6 +151,7 @@ Solver::Solver(GameState &game)
           inceptStrategy(game, empire),
           strategies({&prolongateStrategy, &inceptStrategy})
 {
+    assert(!game.getMinDistances().empty());
 }
 
 void Solver::claimEdge(vert_t i, vert_t j, punter_t punter) {

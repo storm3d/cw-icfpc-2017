@@ -235,6 +235,9 @@ void OfflineProtocol::writeMoveResponseTactic(std::ostream &out, GameState *stat
 }
 
 void OfflineProtocol::writeMoveResponseAggregate(std::ostream &out, GameState *state) {
+    if (state->getMinDistances().empty()) {
+        state->initMinDistances();
+    }
     Solver solver(*state);
     River r = solver.riverToClaim();
 
