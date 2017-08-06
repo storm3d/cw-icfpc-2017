@@ -42,6 +42,20 @@ TEST_CASE("ISolverStrategy") {
         REQUIRE(d.isEmpty());
     }
 
+    SECTION("'Incept' strategy") {
+        Incept incept(*game);
+        StrategyDecision d = incept.proposedMove();
+        REQUIRE(d.scoreIncrease == 1);
+
+        incept.claimEdge(d.river.from, d.river.to, game->getPunterId());
+        StrategyDecision d2 = incept.proposedMove();
+        REQUIRE(d2.scoreIncrease == 1);
+        bool has1 = d.river.contains(1) || d2.river.contains(1);
+        REQUIRE(has1);
+        bool has5 = d.river.contains(5) || d2.river.contains(5);
+        REQUIRE(has5);
+    }
+
     prolonger.claimEdge(1, 7, game->getPunterId());
 
     SECTION("'Prolongate existing' strategy") {
@@ -52,15 +66,11 @@ TEST_CASE("ISolverStrategy") {
         prolonger.claimEdge(d.river.from, d.river.to, game->getPunterId());
 
         d = prolonger.proposedMove();
-        CAPTURE(d.river);
         REQUIRE(d.scoreIncrease == 5);
-//        REQUIRE(d.river == River(0, 1));  // bad, bad assertion! We dunno what river it will pick this time.
 
         prolonger.claimEdge(d.river.from, d.river.to, game->getPunterId());
 
         d = prolonger.proposedMove();
-        CAPTURE(d.river);
         REQUIRE(d.scoreIncrease == 5);
-//        REQUIRE(d.river == River(1, 2));
     }
 }

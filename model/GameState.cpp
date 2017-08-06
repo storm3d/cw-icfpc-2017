@@ -35,6 +35,10 @@ bool River::operator!=(const River &rhs) const {
     return !(rhs == *this);
 }
 
+bool River::contains(vert_t v) const {
+    return from == v || to == v;
+}
+
 GameState::GameState() {
 }
 
