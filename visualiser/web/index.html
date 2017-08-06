@@ -63,6 +63,9 @@
 <div class="container-fluid">
     <fieldset>
         <legend>Canvas</legend>
+        <button id="prev">&lt;&lt;</button>
+        <button id="pause">|&nbsp;|</button>
+        <button id="next">&gt;&gt;</button>
         <div class="container-fluid" id="cy"></div>
         <div id="loading">
             <span class="fa fa-refresh fa-spin"></span>
@@ -76,6 +79,7 @@
 <script src="../js-core/cytoscape.min.js"></script>
 <script src="../js-core/bluebird.min.js"></script>
 <script src="../js-core/js-core.js"></script>
+<script src="messageQueue.js"></script>
 <script src="puntfx.js"></script>
 </body>
 </html>

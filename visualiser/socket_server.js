@@ -1,6 +1,6 @@
 const WebSocketServer = require('ws').Server;
 const wss = new WebSocketServer({ port: 9998 });
-const inputFilename = __dirname + '/log_input.txt';
+const inputFilename = __dirname + '/../bin/game_log.txt';
 const { watchInputFile, sendDataToSocket } = require('./helpers');
 
 wss.on('connection', (ws) => {
@@ -9,6 +9,6 @@ wss.on('connection', (ws) => {
   });
 
   ws.on('message', (message) => {
-    console.log(message);
+    console.log(`-> '${message}'`);
   });
 });

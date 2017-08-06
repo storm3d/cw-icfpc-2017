@@ -13,8 +13,8 @@ const relayPort = 9998;
 /* Graph rendering */
 
 const colours =
-  ["#1f77b4",
-    "#aec7e8",
+  ["red",
+    "green",
     "#ff7f0e",
     "#ffbb78",
     "#2ca02c",
@@ -108,6 +108,17 @@ function writeLog(msg) {
   return;
 }
 
+function rmLastFromLog() {
+  const id = 'log';
+  const separator = "\n";
+  const logEl = document.getElementById(id);
+  const logItems = logEl.innerHTML.split(separator);
+
+  logEl.innerHTML = logItems.slice(0, -2).join(separator) + separator;
+
+  return;
+}
+
 function logInfo(msg) {
   writeLog("info: " + msg);
   return;
@@ -176,43 +187,7 @@ function connect(gamePort, punterName) {
     return;
   };
 
-  socket.onmessage = function (message) {
-    try {
-      let msg = JSON.parse(message.data.split(/:(.+)/)[1]);
-      // Initial message
-      if (msg.map !== undefined) {
-        // Record our ID, and the number of punters
-        punterID = msg.punter;
-        numPunters = msg.punters;
-
-        logInfo("our punter ID: " + punterID);
-        logInfo("number of punters: " + numPunters);
-        logInfo("received initial game graph: " + JSON.stringify(msg.map));
-        graph = {
-          "nodes": msg.map.sites,
-          "edges": msg.map.rivers,
-          "mines": msg.map.mines
-        };
-        logInfo("rendering game graph...");
-        renderGraph(msg.map);
-      } else if (msg.move !== undefined) {
-        handleIncomingMoves(msg.move.moves);
-      } else if (msg.stop !== undefined) {
-        handleIncomingMoves(msg.stop.moves);
-        printFinalScores(msg.stop.scores);
-      } else {
-        logError("unknown JSON message: " + message.data);
-      }
-    } catch (e) { // other message from the server
-      console.log(e);
-      if (message.data.constructor == String) {
-        logRelay(message.data);
-      } else {
-        logError("received unknown message from relay.");
-      }
-    }
-    return;
-  };
+  socket.onmessage = sendMessageToQueue;
   return;
 }
 
@@ -312,7 +287,8 @@ function theirTurn() {
 /* GAME UPDATE LOGIC */
 
 function updateEdgeOwner(punter, source, target) {
-  const es = cy.edges("[source=\"" + source + "\"][target=\"" + target + "\"]");
+  const es = getEdge({ source, target });
+
   if (es.length > 0) {
     const e = es[0];
     e.data()["owner"] = punter;
@@ -368,5 +344,44 @@ function playQueuedClaims() {
   queuedPass = false;
   ourTurn();
 }
+
+function handleMessage(message) {
+  try {
+    let msg = JSON.parse(message.data.split(/:(.+)/)[1]);
+    // Initial message
+    if (msg.map !== undefined) {
+      // Record our ID, and the number of punters
+      punterID = msg.punter;
+      numPunters = msg.punters;
+
+      logInfo("our punter ID: " + punterID);
+      logInfo("number of punters: " + numPunters);
+      logInfo("received initial game graph: " + JSON.stringify(msg.map));
+      graph = {
+        "nodes": msg.map.sites,
+        "edges": msg.map.rivers,
+        "mines": msg.map.mines
+      };
+      logInfo("rendering game graph...");
+      renderGraph(msg.map);
+    } else if (msg.move !== undefined) {
+      handleIncomingMoves(msg.move.moves);
+    } else if (msg.stop !== undefined) {
+      handleIncomingMoves(msg.stop.moves);
+      printFinalScores(msg.stop.scores);
+    } else {
+      logError("unknown JSON message: " + message.data);
+    }
+  } catch (e) { // other message from the server
+    console.log(e);
+    if (message.data.constructor == String) {
+      logRelay(message.data);
+    } else {
+      logError("received unknown message from relay.");
+    }
+  }
+  return;
+};
+
 
 _connect();
