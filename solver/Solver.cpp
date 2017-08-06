@@ -80,12 +80,6 @@ StrategyDecision Prolongate::proposedMove() {
 
 StrategyDecision Incept::proposedMove() {
     StrategyDecision decision;
-//    double max_mine_risk = 0;
-
-    long unused_mines = std::count_if(
-            game.getMines().begin(),
-            game.getMines().end(),
-            [this](vert_t v) { return this->empire.getByVertex(v) == nullptr; });
 
     for (vert_t mine : game.getMines()) {
 
@@ -101,7 +95,7 @@ StrategyDecision Incept::proposedMove() {
             continue;
         }
 
-        score_t mineLossRisk = game.getSitesNum() / available_edges / 100;
+        double mineLossRisk = 10.0 / available_edges;
         if (mineLossRisk > decision.riskIfNot) {
             decision.riskIfNot = mineLossRisk;
             decision.scoreIncrease = 1;
