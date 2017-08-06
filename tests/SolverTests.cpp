@@ -32,7 +32,8 @@ TEST_CASE("ISolverStrategy") {
     json j = json::parse(problem);
     auto game = dummy.extractStateFromSetupRequest(j);
     game->initMinDistances();
-    Prolongate prolonger(*game);
+    Empire empire(*game, game->getPunterId());
+    Prolongate prolonger(*game, empire);
 
     REQUIRE(game->getMinDistances().at(1)[5] == 2);
     REQUIRE(game->getMinDistances().at(5)[1] == 2);
@@ -43,7 +44,7 @@ TEST_CASE("ISolverStrategy") {
     }
 
     SECTION("'Incept' strategy") {
-        Incept incept(*game);
+        Incept incept(*game, empire);
         StrategyDecision d = incept.proposedMove();
         REQUIRE(d.scoreIncrease == 1);
 
