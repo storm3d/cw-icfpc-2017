@@ -218,6 +218,19 @@ void OfflineProtocol::writeMoveResponseTactic(std::ostream &out, GameState *stat
         return;
     }
 
+    // if we're here it means that we are landlocked - lets try to fuckup other players
+    for (vert_t v1 = 0; v1 < state->getSitesNum(); v1++) {
+        for (auto &vi : state->getEdgesFrom(v1)) {
+            if (v1 >= vi.first)
+                continue;
+
+            if(vi.second == -1) {
+                writeClaimResponse(out, state, state->getPunterId(), v1, vi.first);
+                return;
+            }}
+
+        }
+
     writePassResponse(out, state, state->getPunterId());
 }
 
