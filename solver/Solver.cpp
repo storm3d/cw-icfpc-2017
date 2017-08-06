@@ -101,9 +101,9 @@ StrategyDecision Incept::proposedMove() {
             continue;
         }
 
-        score_t mineRisk = game.getSitesNum() / available_edges;
-        if (mineRisk > decision.riskIfNot) {
-            decision.riskIfNot = mineRisk;
+        score_t mineLossRisk = game.getSitesNum() / available_edges / 100;
+        if (mineLossRisk > decision.riskIfNot) {
+            decision.riskIfNot = mineLossRisk;
             decision.scoreIncrease = 1;
             // Just pick the first edge. TODO: Use another strategy to select one, like, whom?..
             auto continuation = game.getAvailableEdgesFrom(mine).begin();
