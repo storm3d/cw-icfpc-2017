@@ -185,6 +185,9 @@ struct runner_state{
     std::cout<<"in:"<<std::endl<<log_start.dump()<<std::endl;
   }
 
+  // TODO: implement
+  int calc_score(int punter){return 0;}
+
   void final_log()
   {
     if (g_LogPunter == -1) return;
@@ -194,8 +197,10 @@ struct runner_state{
     log_stop["state"] = "###";
     std::cout<<"in:"<<std::endl<<log_stop.dump()<<std::endl;
 
-    std::cout<<std::endl<<"SCORES: "<< ""; //0, 22, 0, 1, 0, 3, 2, 39, 
-    std::cout<<std::endl<<"OUR SCORE: " << 0 << std::endl;
+    std::cout<<std::endl<<"SCORES:";
+    for(int i = 0; i < g_Punters; i++) std::cout<<" "<<calc_score(i)<<",";
+
+    std::cout<<std::endl<<"OUR SCORE: " << calc_score(g_LogPunter) << std::endl;
     std::cout<<std::endl<<"FINISHED IN : "<<turns<<" TURNS"<< std::endl;
   }
 
