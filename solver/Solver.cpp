@@ -130,8 +130,8 @@ River Solver::riverToClaim() {
             decisions.begin(),
             decisions.end(),
             [](StrategyDecision a, StrategyDecision b) {
-                return a.scoreIncrease - a.riskIfNot * RISK_COEFFICIENT
-                       > b.scoreIncrease - b.riskIfNot * RISK_COEFFICIENT;
+                return a.scoreIncrease + a.riskIfNot * RISK_COEFFICIENT
+                       < b.scoreIncrease + b.riskIfNot * RISK_COEFFICIENT;
             });
 
     return decision_it->river;
@@ -153,4 +153,8 @@ void Solver::claimEdge(vert_t i, vert_t j, punter_t punter) {
     for (auto strat : strategies) {
         strat->claimEdge(i, j, punter);
     }
+}
+
+const Empire &Solver::getEmpire() const {
+    return empire;
 }

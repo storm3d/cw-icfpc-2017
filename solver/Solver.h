@@ -73,6 +73,8 @@ public:
     explicit Solver(GameState &game);
 	River riverToClaim();
 
+    const Empire &getEmpire() const;
+
     void claimEdge(vert_t i, vert_t j, punter_t punter) override;
 };
 

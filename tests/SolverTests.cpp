@@ -38,6 +38,22 @@ TEST_CASE("ISolverStrategy") {
     REQUIRE(game->getMinDistances().at(1)[5] == 2);
     REQUIRE(game->getMinDistances().at(5)[1] == 2);
 
+    SECTION("Whole Solver") {
+        Solver solver(*game);
+
+        River r = solver.riverToClaim();
+        solver.claimEdge(r.from, r.to, game->getPunterId());
+        REQUIRE(solver.getEmpire().getScore() == 1);
+
+        r = solver.riverToClaim();
+        solver.claimEdge(r.from, r.to, game->getPunterId());
+        REQUIRE(solver.getEmpire().getScore() == 10);
+
+        r = solver.riverToClaim();
+        solver.claimEdge(r.from, r.to, game->getPunterId());
+        REQUIRE(solver.getEmpire().getScore() == 15);
+    }
+
     SECTION("This one is not supposed to work on completely empty graph") {
         StrategyDecision d = prolonger.proposedMove();
         REQUIRE(d.isEmpty());
