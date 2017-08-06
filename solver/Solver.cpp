@@ -120,6 +120,8 @@ StrategyDecision Incept::evaluateMove(River r) {
     return decision;
 }
 
+#define RISK_COEFFICIENT 0.5
+
 River Solver::riverToClaim(GameState &game) {
 
     std::vector<StrategyDecision> decisions;
@@ -133,7 +135,10 @@ River Solver::riverToClaim(GameState &game) {
     auto decision_it = std::max_element(
             decisions.begin(),
             decisions.end(),
-            [](StrategyDecision a, StrategyDecision b) { return a.scoreIncrease > b.scoreIncrease; });
+            [](StrategyDecision a, StrategyDecision b) {
+                return a.scoreIncrease - a.riskIfNot * RISK_COEFFICIENT
+                       > b.scoreIncrease - b.riskIfNot * RISK_COEFFICIENT;
+            });
 
     return decision_it->river;
 
@@ -146,4 +151,11 @@ Solver::Solver(GameState &game)
           inceptStrategy(game, empire),
           strategies({&prolongateStrategy, &inceptStrategy})
 {
+}
+
+void Solver::claimEdge(vert_t i, vert_t j, punter_t punter) {
+    empire.claimEdge(i, j, punter);
+    for (auto strat : strategies) {
+        strat->claimEdge(i, j, punter);
+    }
 }

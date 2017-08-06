@@ -39,9 +39,7 @@ public:
 
     virtual ~ISolverStrategy() = default;
 
-    void claimEdge(vert_t i, vert_t j, punter_t punter) override {
-        empire.claimEdge(i, j, punter);
-    }
+    void claimEdge(vert_t i, vert_t j, punter_t punter) override {}
 };
 
 struct Prolongate : public ISolverStrategy {
@@ -75,9 +73,7 @@ public:
     explicit Solver(GameState &game);
 	River riverToClaim(GameState &game);
 
-    void claimEdge(vert_t i, vert_t j, punter_t punter) override {
-        empire.claimEdge(i, j, punter);
-    }
+    void claimEdge(vert_t i, vert_t j, punter_t punter) override;
 };
 
 #endif //CW_ICFPC_2017_SOLVER_H
