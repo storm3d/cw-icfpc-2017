@@ -71,7 +71,7 @@ class Solver : public IGameUpdater {
 
 public:
     explicit Solver(GameState &game);
-	River riverToClaim(GameState &game);
+	River riverToClaim();
 
     void claimEdge(vert_t i, vert_t j, punter_t punter) override;
 };

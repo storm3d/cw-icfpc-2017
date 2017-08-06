@@ -1,6 +1,7 @@
-
 #include <queue>
+#include "Solver.h"
 #include "OfflineProtocol.h"
+
 using namespace std;
 
 void OfflineProtocol::handleRequest(std::istream &in, std::ostream &out) {
@@ -31,11 +32,16 @@ void OfflineProtocol::handleRequest(std::istream &in, std::ostream &out) {
             state->claimEdge(move.from, move.to, move.punter_id);
         }
 
-
-
         // {"claim" : {"punter" : PunterId, "source" : SiteId, "target" : SiteId}}
         // {"state" : state}
+
+#if defined SOLVER_GREEDY
+        writeMoveResponseGreedy(out, state.get());
+#elif defined SOLVER_AGGREGATE
+        writeMoveResponseAggregate(out, state.get());
+#else
         writeMoveResponseTactic(out, state.get());
+#endif
 
     } else if (request.find("stop") != request.end()) {
         // stop request
@@ -209,6 +215,13 @@ void OfflineProtocol::writeMoveResponseTactic(std::ostream &out, GameState *stat
     }
 
     writePassResponse(out, state, state->getPunterId());
+}
+
+void OfflineProtocol::writeMoveResponseAggregate(std::ostream &out, GameState *state) {
+    Solver solver(*state);
+    River r = solver.riverToClaim();
+
+    writeClaimResponse(out, state, state->getPunterId(), r.from, r.to);
 }
 
 void OfflineProtocol::writeSetupResponse(std::ostream &out, GameState *state) {
