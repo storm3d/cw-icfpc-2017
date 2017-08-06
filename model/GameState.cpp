@@ -279,6 +279,8 @@ void GameState::initMinDistances()
 
         for (auto continuation : incidence_list[v]) {
             vert_t v2 = continuation.first;
+            min_distances[v2].resize(vertices_num, INT_MAX);
+
             min_distances[v][v2] = 1;
             min_distances[v2][v] = 1;
         }
