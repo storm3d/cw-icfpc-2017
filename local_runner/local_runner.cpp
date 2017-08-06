@@ -152,7 +152,7 @@ struct runner_state{
         int i = data["claim"]["punter"];
         int src = data["claim"]["source"];
         int dst = data["claim"]["target"];
-        m_Empires[i].claimEdge(src, dst, i);
+        m_Empires[i].claimEdge(m_Games[i].toInternalId(src), m_Games[i].toInternalId(dst), i);
         // TODO: check claim is valid
       }
       else if (data.find("splurge") != data.end())
