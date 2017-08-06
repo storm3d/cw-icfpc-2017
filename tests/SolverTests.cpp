@@ -89,6 +89,6 @@ TEST_CASE("Empire_can_claimEdge") {
     auto game = dummy.extractStateFromSetupRequest(j);
     game->initMinDistances();
     Empire empire(*game, game->getPunterId());
-    empire.claimEdge(278, 302, 0);
+    empire.claimEdge(game->toInternalId(278), game->toInternalId(302), 0);
 }
 
