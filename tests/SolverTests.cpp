@@ -26,36 +26,42 @@ string problem = R"(
   }
 })";
 
-TEST_CASE("'Prolongate existing' strategy") {
+TEST_CASE("ISolverStrategy") {
 
     OfflineProtocol dummy;
     json j = json::parse(problem);
     auto game = dummy.extractStateFromSetupRequest(j);
     game->initMinDistances();
-    Prolongate prolonger;
+    Prolongate prolonger(*game);
+
+    REQUIRE(game->getMinDistances().at(1)[5] == 2);
+    REQUIRE(game->getMinDistances().at(5)[1] == 2);
 
     SECTION("This one is not supposed to work on completely empty graph") {
-        StrategyDecision d = prolonger.proposedMove(*game.get());
+        StrategyDecision d = prolonger.proposedMove();
+        REQUIRE(d.isEmpty());
     }
 
-    game->claimEdge(0, 1, game->getPunterId());
+    prolonger.claimEdge(1, 7, game->getPunterId());
 
-    StrategyDecision d = prolonger.proposedMove(*game.get());
-    CAPTURE(d.river);
-    REQUIRE(d.scoreIncrease == 1);
-    REQUIRE(d.river == River(0, 7)); // bad, bad assertion! We dunno what river it will pick.
+    SECTION("'Prolongate existing' strategy") {
+        StrategyDecision d = prolonger.proposedMove();
+        CAPTURE(d.river);
+        REQUIRE(d.scoreIncrease == 1);
+        REQUIRE(d.river == River(5, 7)); // bad, bad assertion! We dunno what river it will pick.
 
-    game->claimEdge(d.river.from, d.river.to, game->getPunterId());
+        prolonger.claimEdge(d.river.from, d.river.to, game->getPunterId());
 
-    d = prolonger.proposedMove(*game.get());
-    CAPTURE(d.river);
-    REQUIRE(d.river == River(2, 3));
-    REQUIRE(d.scoreIncrease == 4);
+        d = prolonger.proposedMove();
+        CAPTURE(d.river);
+        REQUIRE(d.scoreIncrease == 4);
+        REQUIRE(d.river == River(0, 1));
 
-    game->claimEdge(d.river.from, d.river.to, game->getPunterId());
+        prolonger.claimEdge(d.river.from, d.river.to, game->getPunterId());
 
-    d = prolonger.proposedMove(*game.get());
-    CAPTURE(d.river);
-//    REQUIRE(d.river == River(2, 3));
-    REQUIRE(d.scoreIncrease == 9);
+        d = prolonger.proposedMove();
+        CAPTURE(d.river);
+        REQUIRE(d.scoreIncrease == 9);
+        REQUIRE(d.river == River(1, 2));
+    }
 }

@@ -11,7 +11,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 set(SOURCE_FILES
 		punter/punter.cpp
 		model/GameState.cpp
-		model/Dijkstra.cpp
 		model/GameState.h
 		solver/Solver.cpp
 		solver/Solver.h
@@ -32,8 +31,6 @@ add_executable(local_runner ${SOURCE_FILES})
 
 set(SOURCE_FILES
 		tests/tests-main.cpp
-		model/Dijkstra.cpp
-		tests/tests-dijkstra.cpp
 		model/GameState.cpp
 		tests/TestGameState.cpp
 		punter/OfflineProtocol.cpp

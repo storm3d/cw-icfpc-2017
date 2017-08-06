@@ -1,8 +1,6 @@
 #include <cassert>
-#include <json.hpp>
 
 #include "GameState.h"
-#include "Dijkstra.h"
 
 // for convenience
 using json = nlohmann::json;
@@ -145,6 +143,8 @@ void GameState::deserialize(json& state) {
             }
         }
     }
+
+    incidence_available = incidence_list;
 }
 
 std::istream & operator << (std::istream &in, GameState& game)
@@ -223,20 +223,24 @@ void GameState::claimEdge(vert_t from, vert_t to, punter_t punter)  {
     auto it = incidence_list[from].find(to);
     if (it != incidence_list[from].end())
     {
-        int inc = incidence_list[from][to];
         incidence_list[from][to] = punter;
+        incidence_available[from].erase(to);
     }
 
     it = incidence_list[to].find(from);
     if (it != incidence_list[to].end())
     {
-        int inc = incidence_list[to][from];
         incidence_list[to][from] = punter;
+        incidence_available[to].erase(from);
     }
 }
 
 const std::unordered_map<vert_t, punter_t> &GameState::getEdgesFrom(vert_t vertex) const {
     return incidence_list[vertex];
+}
+
+const std::unordered_map<vert_t, punter_t> &GameState::getAvailableEdgesFrom(vert_t vertex) const {
+    return incidence_available[vertex];
 }
 
 const std::unordered_set<vert_t>& GameState::getMines() const {
@@ -270,15 +274,27 @@ void GameState::initMinDistances()
     vert_t vertices_num = incidence_list.size();
     vert_t mines_num = mines.size();
 
-    for (vert_t mine : mines) {
-        std::vector<std::vector<vert_t>> adj(getSitesNum());
+    for (vert_t v = 0; v < vertices_num; v++) {
+        min_distances[v].resize(vertices_num, INT_MAX);
 
-        for (std::pair<vert_t, punter_t> v : getEdgesFrom(mine)) {
-            adj[mine].push_back(v.first);
-            adj[v.first].push_back(mine);
+        for (auto continuation : incidence_list[v]) {
+            vert_t v2 = continuation.first;
+            min_distances[v][v2] = 1;
+            min_distances[v2][v] = 1;
         }
-        std::vector<vert_t> vertext_distances(vertices_num);
-        Dijkstra(mine, adj, vertext_distances);
-        min_distances[mine] = vertext_distances;
+    }
+
+    // Variant of Dijkstra: https://en.wikipedia.org/wiki/Floyd%E2%80%93Warshall_algorithm
+    for (vert_t intermVertex = 0; intermVertex < vertices_num; intermVertex++) {
+//        for (vert_t mine : mines) { - doesn't work somewhy.
+        for (vert_t startVertex = 0; startVertex < vertices_num; startVertex++) {
+            for (vert_t endVertex = 0; endVertex < vertices_num; endVertex++) {
+                if (isEdge(startVertex, intermVertex) && isEdge(intermVertex, endVertex)) {
+                    vert_t old_d = min_distances[startVertex][endVertex];
+                    vert_t new_d = min_distances[startVertex][intermVertex] + min_distances[intermVertex][endVertex];
+                    min_distances[startVertex][endVertex] = std::min(new_d, old_d);
+                }
+            }
+        }
     }
 }
