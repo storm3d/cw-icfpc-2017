@@ -29,7 +29,11 @@ int main() {
     // TODO: proper reading length of JSON
     char ch;
     unsigned long len;
+#ifdef __MINGW32__
     std::cin.setf(std::_S_unitbuf);
+#else
+    std::cin.setf(std::ios_base::unitbuf);
+#endif
     std::cin>>len>>ch;
     for(int i=len; i-->0;) std::cin>>ch; // skip handshake
     std::cin>>len>>ch;

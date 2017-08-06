@@ -122,7 +122,7 @@ StrategyDecision Incept::evaluateMove(River r) {
 
 #define RISK_COEFFICIENT 0.5
 
-River Solver::riverToClaim(GameState &game) {
+River Solver::riverToClaim() {
 
     std::vector<StrategyDecision> decisions;
     std::transform(

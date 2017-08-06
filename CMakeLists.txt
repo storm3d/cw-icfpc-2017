@@ -25,6 +25,14 @@ endif (MINGW)
 add_executable(punter ${SOURCE_FILES})
 target_link_libraries(punter PRIVATE)
 
+add_executable(punter-greedy ${SOURCE_FILES})
+target_link_libraries(punter-greedy PRIVATE)
+target_compile_definitions(punter-greedy PRIVATE SOLVER_GREEDY=1)
+
+add_executable(punter-aggro ${SOURCE_FILES})
+target_link_libraries(punter-aggro PRIVATE)
+target_compile_definitions(punter-aggro PRIVATE SOLVER_AGGREGATE=1)
+
 set(SOURCE_FILES punter2/punter2.cpp)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 add_executable(punter2 ${SOURCE_FILES})
