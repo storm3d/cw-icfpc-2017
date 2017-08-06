@@ -221,7 +221,11 @@ void OfflineProtocol::writeMoveResponseAggregate(std::ostream &out, GameState *s
     Solver solver(*state);
     River r = solver.riverToClaim();
 
-    writeClaimResponse(out, state, state->getPunterId(), r.from, r.to);
+    if (r != River::EMPTY) {
+        writeClaimResponse(out, state, state->getPunterId(), r.from, r.to);
+    } else {
+        writePassResponse(out, state, state->getPunterId());
+    }
 }
 
 void OfflineProtocol::writeSetupResponse(std::ostream &out, GameState *state) {
