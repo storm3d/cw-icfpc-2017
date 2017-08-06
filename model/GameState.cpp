@@ -1,5 +1,6 @@
 #include <cassert>
 #include <climits>
+#include <queue>
 #include "GameState.h"
 
 // for convenience
@@ -316,23 +317,89 @@ void GameState::initMinDistances()
 
 void GameState::initPotentials(int depth) {
 
-    potential_list.resize(getSitesNum(), 0);
+    potential_list.resize(getSitesNum() * (1 + getMinesNum()), 0);
     for(int i = 0; i < getSitesNum(); i++) {
         potential_t pot = incidence_list[i].size();
-        if(isMine(i))
-            pot+= MINE_POTENTIAL;
         potentialAt(i) = pot;
+
+        if(site_colors[i])
+            potentialAt(i + site_colors[i]*getSitesNum()) = MINE_POTENTIAL;
+
         //cerr << "pot[" << i << "]=" << pot << endl;
     }
 
     // propagate
-    for(int i = 0; i < 3; i++) {
+    for(int i = 0; i < depth; i++) {
         std::vector<potential_t> new_potential_list(potential_list);
         for (int i = 0; i < getSitesNum(); i++) {
             for (auto near: incidence_list[i]) {
-                new_potential_list[i] += potentialAt(near.first) / 100;
+
+                if(near.second == -1) {
+                    new_potential_list[i] += potentialAt(near.first) / 10;
+
+                    for(int j = 1; j <= getMinesNum(); j++) {
+                        new_potential_list[i + j*getSitesNum()] += potentialAt(near.first + j*getSitesNum()) / 10;
+                    }
+                }
+//                else if(near.second == punter_id)
+//                    new_potential_list[i] += potentialAt(near.first) / 10;
             }
         }
         potential_list = new_potential_list;
     }
+}
+
+void GameState::colorOurSites() {
+
+    site_colors.resize(getSitesNum(), 0);
+    int color = 1;
+    for(auto mine: getMines()) {
+        site_colors[mine] = color++;
+    }
+
+    // color each cluster
+    for(auto mine: getMines()) {
+        int color = site_colors[mine];
+        std::queue<vert_t> wave;
+        wave.push(mine);
+
+        while(wave.size()) {
+            auto cur = wave.front();
+            for(auto edge : getEdgesFrom(cur)) {
+                if(edge.second != punter_id || site_colors[edge.first] == color)
+                    continue;
+                wave.push(edge.first);
+
+                // another region found
+                /*
+                if(site_colors[edge.first] != 0) {
+                    int toRecolor = site_colors[edge.first];
+                    for(int i = 0; i < site_colors.size(); i++)
+                        if(site_colors[i] == toRecolor)
+                            site_colors[i] = color;
+
+                }
+                 */
+                site_colors[edge.first] = color;
+            }
+            wave.pop();
+        }
+    }
+}
+
+potential_t GameState::coloredPotentialAt(vert_t i) const {
+    potential_t pot = potential_list[i];
+
+    int colorsNum = 0;
+    potential_t colorPart = 0;
+    for(int j = 1; j <= getMinesNum(); j++) {
+        colorPart += potential_list[i + j*getSitesNum()];
+        if(j && potential_list[i + j*getSitesNum()])
+            colorsNum++;
+    }
+    if(colorsNum) {
+        colorPart*= colorsNum;
+    }
+
+    return pot + colorPart;
 }

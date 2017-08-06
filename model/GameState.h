@@ -16,7 +16,7 @@ typedef float potential_t;
 
 typedef std::unordered_map<vert_t, punter_t> VertexIncidence;
 
-const float MINE_POTENTIAL=20;
+const float MINE_POTENTIAL=10;
 
 struct River {
     vert_t from;
@@ -76,10 +76,13 @@ public:
     bool isMine(vert_t i) const;
 
     potential_t &potentialAt(vert_t i) {return potential_list[i];}
+    potential_t coloredPotentialAt(vert_t i) const;
 
     void initPotentials(int depth);
+    void colorOurSites();
     const std::vector<potential_t> &getPotentials() const {return potential_list;}
     const std::unordered_set<vert_t> &getOurSites() const {return our_sites;}
+    const std::vector<int> &getColors() const {return site_colors;}
 
     // Whoopsie, I'm exposing implementation.
     const std::unordered_set<vert_t> &getMines() const;
@@ -105,6 +108,7 @@ private:
     std::unordered_set<vert_t> mines;
 
     std::vector<potential_t> potential_list;
+    std::vector<int> site_colors;
     std::unordered_set<vert_t> our_sites;
 
     vert_t punters_num = 0;

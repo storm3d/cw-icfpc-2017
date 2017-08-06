@@ -192,7 +192,8 @@ inline bool operator< (const PotentialEdge& lhs, const PotentialEdge& rhs){ retu
 void OfflineProtocol::writeMoveResponseTactic(std::ostream &out, GameState *state) {
 
     // potential algorithm
-    state->initPotentials(1);
+    state->colorOurSites();
+    state->initPotentials(10);
 
     std::unordered_set<vert_t> froms(state->getOurSites());
     froms.insert(state->getMines().begin(), state->getMines().end());
@@ -201,9 +202,9 @@ void OfflineProtocol::writeMoveResponseTactic(std::ostream &out, GameState *stat
 
     for (auto from : froms) {
         for (auto &edge : state->getEdgesFrom(from)) {
-            if (edge.second == -1)
-                fringeEdges.push_back({state->getPotentials()[from]
-                                       + state->getPotentials()[edge.first], from, edge.first});
+            if (edge.second == -1 && state->getColors()[from] != state->getColors()[edge.first])
+                fringeEdges.push_back({state->coloredPotentialAt(from)
+                                       + state->coloredPotentialAt(edge.first), from, edge.first});
         }
     }
 
