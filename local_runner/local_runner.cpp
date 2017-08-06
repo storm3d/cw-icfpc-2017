@@ -110,8 +110,8 @@ json parse_response(const std::string & response)
 struct runner_state{
   std::vector<json> m_States;
   std::vector<json> m_Moves;
-  //std::vector<std::unique_ptr<GameState>> m_Games;
-  GameState game;
+  std::vector<GameState> m_Games;
+  //GameState game;
   std::vector<Empire> m_Empires;
   json m_Map;
   int turns;
@@ -120,18 +120,19 @@ struct runner_state{
   {
     m_Map = map;
     turns = m_Map["rivers"].size();
+    m_States.resize(n);
+    m_Games.resize(n);
+
     for (int i = 0; i < n; i++)
     {
-      json j;
-      j["state"] = i;
-      m_States.push_back(j);
+      m_States[i]["state"] = i; // stub initial state
       m_Moves.push_back(create_pass_move(i));
-      // create empire for each punter
+      // create separate empire for each punter
       OfflineProtocol protocol;
       json data = create_startup(i, g_Punters, m_Map);
-      game = *protocol.extractStateFromSetupRequest(data);
-      game.initMinDistances();
-      Empire e(game, i);
+      m_Games[i] = *protocol.extractStateFromSetupRequest(data);
+      m_Games[i].initMinDistances();
+      Empire e(m_Games[i], i);
       m_Empires.push_back(e);
     }
   }
@@ -147,9 +148,10 @@ struct runner_state{
       else if (data.find("claim") != data.end())
       {
         j["claim"] = data["claim"];
-        int src = data["claim"]["source"]; std::cout<<'s'<<src; std::cout.flush();
-        int dst = data["claim"]["target"]; std::cout<<'d'<<dst; std::cout.flush();
-        m_Empires[punter].claimEdge(src, dst, punter); /// FAILS
+        int i = data["claim"]["punter"];
+        int src = data["claim"]["source"];
+        int dst = data["claim"]["target"];
+        m_Empires[i].claimEdge(src, dst, i);
         // TODO: check claim is valid
       }
       else if (data.find("splurge") != data.end())
