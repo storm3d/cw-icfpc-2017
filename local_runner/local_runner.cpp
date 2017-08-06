@@ -214,6 +214,12 @@ struct runner_state{
 
     json log_stop;
     log_stop["stop"] = create_move_query(g_LogPunter)["move"];
+    log_stop["scores"] = {};
+    for(int i = 0; i < g_Punters; i++)
+    {
+      log_stop["scores"][i]["punter"] = i;
+      log_stop["scores"][i]["score"] = calc_score(i);
+    }
     if (!g_LogState) log_stop["state"] = "###";
     std::cout<<"in:"<<std::endl<<log_stop.dump()<<std::endl;
 
