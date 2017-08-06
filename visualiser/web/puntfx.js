@@ -16,7 +16,7 @@ const colours =
   [
     "white",
     "yellow",
-    "rgb",
+    "#8d7f98",
     "#ffbb78",
     "#2ca02c",
     "#98df8a",
