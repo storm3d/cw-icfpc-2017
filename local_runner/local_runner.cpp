@@ -156,7 +156,8 @@ struct runner_state{
 
   json create_move_query(int punter)
   {
-    m_Move["state"] = m_States[punter];
+    m_Move["state"] = m_States[punter]["state"];
+      return m_Move;
   }
 
 } g_State;
