@@ -15,6 +15,7 @@ std::string g_MapName = "sample";
 int g_Punters = 2;
 int g_LogPunter = 0;
 int g_LogState = 0;
+int g_LogInputs = 0;
 
 json read_file(const std::string & filename)
 {
@@ -228,7 +229,7 @@ struct runner_state{
 
 int main(int argc, char *argv[]) {
       int opt;
-      while ((opt = getopt(argc, argv, "p:m:n:l:s")) != -1) {
+      while ((opt = getopt(argc, argv, "p:m:n:l:si")) != -1) {
         switch (opt) {
         case 'p':
             g_PunterNames.push_back(optarg);
@@ -245,9 +246,13 @@ int main(int argc, char *argv[]) {
         case 's':
             g_LogState = 1;
             break;
+        case 'i':
+            g_LogInputs = 1;
+            break;
         default: /* '?' */
-            fprintf(stderr, "Usage: %s [-s] [-l log_punter] [-m map_name] [-n punters] [-p punter_name]\n"
+            fprintf(stderr, "Usage: %s [-s] [-i] [-l log_punter] [-m map_name] [-n punters] [-p punter_name]\n"
             "\t-s             : preserve actual state in log. by default state is printed as '###' to shorten logs\n"
+            "\t-i             : log input json\n"
             "\t-l log_punter  : index of punter that will be logged. 0 by default\n"
             "\t-m map_name    : name of map file from 'maps/' folder w/o extension \n\t\t\t(i.e. tube, circle, boston-sparse, etc). 'sample' by default\n"
             "\t-n punters     : total number of punters. Must be greater than 1. 2 by default\n"
@@ -284,6 +289,7 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < g_Punters; i++)
     {
       json test = create_startup(i, g_Punters, map_data);
+      if (g_LogInputs) std::cout<<test.dump()<<std::endl;
       std::string response = call_punter(i, test);
       g_State.log(-1, response);
       g_State.process_response(i, parse_response(response));
@@ -293,6 +299,7 @@ int main(int argc, char *argv[]) {
     {
         int punter = turn % g_Punters;
         json test = g_State.create_move_query(punter);
+        if (g_LogInputs) std::cout<<test.dump()<<std::endl;
         std::string response = call_punter(punter, test);
         g_State.log(punter, response);
         try {
