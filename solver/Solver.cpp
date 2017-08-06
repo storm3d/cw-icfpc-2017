@@ -124,7 +124,7 @@ StrategyDecision Incept::evaluateMove(River r) {
 
 River Solver::riverToClaim() {
 
-    std::vector<StrategyDecision> decisions;
+    std::vector<StrategyDecision> decisions(strategies.size());
     std::transform(
             strategies.begin(),
             strategies.end(),
