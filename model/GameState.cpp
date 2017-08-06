@@ -35,6 +35,10 @@ bool River::operator!=(const River &rhs) const {
     return !(rhs == *this);
 }
 
+bool River::contains(vert_t v) const {
+    return from == v || to == v;
+}
+
 GameState::GameState() {
 }
 
@@ -284,6 +288,7 @@ void GameState::initMinDistances()
             min_distances[v][v2] = 1;
             min_distances[v2][v] = 1;
         }
+        min_distances[v][v] = 0;
     }
 
     // Variant of Dijkstra: https://en.wikipedia.org/wiki/Floyd%E2%80%93Warshall_algorithm

@@ -1,31 +1,6 @@
 #include "Solver.h"
 #include "Empire.h"
 
-std::pair<vert_t, vert_t> Solver::riverToClaim(GameState &game) {
-    Empire empire(game, 0);
-
-    // 1. Continue whatever longest path I have.
-    std::pair<vert_t, vert_t> candidate = {0, 0};
-    long bestScoreIncrease = 0;
-
-    if (bestScoreIncrease > 0) {
-        return candidate;
-    }
-
-    // 2. Claim whatever free river adjacent to a mine.
-    for (auto mine : game.getMines()) {
-        for (auto edge : game.getEdgesFrom(mine)) {
-            if (edge.second == -1) {
-                return {mine, edge.first};
-            }
-        }
-    }
-
-    // 3. If none exist, just pass - we cannot gain any more score.
-
-    return candidate;
-}
-
 StrategyDecision Prolongate::evaluateMove(River r) {
     StrategyDecision decision;
     decision.river = r;
@@ -143,4 +118,32 @@ StrategyDecision Incept::evaluateMove(River r) {
     StrategyDecision decision;
 
     return decision;
+}
+
+River Solver::riverToClaim(GameState &game) {
+
+    std::vector<StrategyDecision> decisions;
+    std::transform(
+            strategies.begin(),
+            strategies.end(),
+            decisions.begin(),
+            [] (ISolverStrategy *s) { return s->proposedMove(); }
+    );
+
+    auto decision_it = std::max_element(
+            decisions.begin(),
+            decisions.end(),
+            [](StrategyDecision a, StrategyDecision b) { return a.scoreIncrease > b.scoreIncrease; });
+
+    return decision_it->river;
+
+}
+
+Solver::Solver(GameState &game)
+        : game(game),
+          empire(game, game.getPunterId()),
+          prolongateStrategy(game, empire),
+          inceptStrategy(game, empire),
+          strategies({&prolongateStrategy, &inceptStrategy})
+{
 }

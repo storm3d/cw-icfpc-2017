@@ -25,6 +25,7 @@ struct River {
     bool operator!=(const River &rhs) const;
 
     bool isAdjacent(const River &other) const;
+    bool contains(vert_t v) const;
 
     static const River EMPTY;
 };
