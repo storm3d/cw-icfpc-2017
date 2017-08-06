@@ -26,6 +26,7 @@ public:
 
     void handleRequest(std::istream &in, std::ostream &out);
 
+    std::unique_ptr<GameState> extractStateFromSetupRequest(std::istream &in);
     std::unique_ptr<GameState> extractStateFromSetupRequest(json &setup_request);
 
     std::unique_ptr<GameState> extractStateFromMoveRequest(json &setup_request);
