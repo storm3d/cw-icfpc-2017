@@ -27,10 +27,10 @@ struct StrategyDecision {
 class ISolverStrategy : public IGameUpdater {
 protected:
     GameState &game;
-    Empire empire;
+    Empire &empire;
 
 public:
-    ISolverStrategy(GameState &game) : game(game), empire(game, game.getPunterId()) {};
+    ISolverStrategy(GameState &game, Empire &empire) : game(game), empire(empire) {};
 
     /** Select a move somehow */
     virtual StrategyDecision proposedMove() = 0;
@@ -45,20 +45,39 @@ public:
 };
 
 struct Prolongate : public ISolverStrategy {
-    Prolongate(GameState &game) : ISolverStrategy(game) {};
+    Prolongate(GameState &game, Empire &empire) : ISolverStrategy(game, empire) {};
     StrategyDecision proposedMove() override;
     StrategyDecision evaluateMove(River r) override;
 };
 
 struct Incept : public ISolverStrategy {
-    Incept(GameState &game) : ISolverStrategy(game) {};
+    Incept(GameState &game, Empire &empire) : ISolverStrategy(game, empire) {};
     StrategyDecision proposedMove() override;
+    /** @deprecated Not implemented yet */
     StrategyDecision evaluateMove(River r) override;
 };
 
-class Solver {
+//struct CompositeSolver : public ISolverStrategy {
+//    CompositeSolver(GameState &game, Empire &empire) : ISolverStrategy(game) {};
+//    StrategyDecision proposedMove() override;
+//    /** @deprecated Not implemented yet */
+//    StrategyDecision evaluateMove(River r) override;
+//};
+
+class Solver : public IGameUpdater {
+    GameState &game;
+    Empire empire;
+    Prolongate prolongateStrategy;
+    Incept inceptStrategy;
+    std::vector<ISolverStrategy *> strategies;
+
 public:
-	std::pair<vert_t, vert_t> riverToClaim(GameState &game);
+    explicit Solver(GameState &game);
+	River riverToClaim(GameState &game);
+
+    void claimEdge(vert_t i, vert_t j, punter_t punter) override {
+        empire.claimEdge(i, j, punter);
+    }
 };
 
 #endif //CW_ICFPC_2017_SOLVER_H
