@@ -1,8 +1,15 @@
 #include <catch.hpp>
 #include "../model/GameState.h"
-#include "../model/Solver.h"
+#include "../solver/Solver.h"
+#include "../punter/OfflineProtocol.h"
 
 using std::string;
+
+namespace Catch {
+    template<> std::string toString<River>(River const& r) {
+        return string("{") + std::to_string(r.from) + "->" + std::to_string(r.to) + "}";
+    }
+}
 
 string problem = R"(
 {
@@ -19,10 +26,36 @@ string problem = R"(
   }
 })";
 
-TEST_CASE("Prolongate") {
-    GameState game(problem);
+TEST_CASE("'Prolongate existing' strategy") {
 
+    OfflineProtocol dummy;
+    json j = json::parse(problem);
+    auto game = dummy.extractStateFromSetupRequest(j);
+    game->initMinDistances();
     Prolongate prolonger;
-    StrategyDecision d = prolonger.proposedMove(game);
+
+    SECTION("This one is not supposed to work on completely empty graph") {
+        StrategyDecision d = prolonger.proposedMove(*game.get());
+    }
+
+    game->claimEdge(0, 1, game->getPunterId());
+
+    StrategyDecision d = prolonger.proposedMove(*game.get());
+    CAPTURE(d.river);
     REQUIRE(d.scoreIncrease == 1);
+    REQUIRE(d.river == River(0, 7)); // bad, bad assertion! We dunno what river it will pick.
+
+    game->claimEdge(d.river.from, d.river.to, game->getPunterId());
+
+    d = prolonger.proposedMove(*game.get());
+    CAPTURE(d.river);
+    REQUIRE(d.river == River(2, 3));
+    REQUIRE(d.scoreIncrease == 4);
+
+    game->claimEdge(d.river.from, d.river.to, game->getPunterId());
+
+    d = prolonger.proposedMove(*game.get());
+    CAPTURE(d.river);
+//    REQUIRE(d.river == River(2, 3));
+    REQUIRE(d.scoreIncrease == 9);
 }

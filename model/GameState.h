@@ -20,7 +20,13 @@ struct River {
     vert_t to;
     River(vert_t from, vert_t to);
 
+    bool operator==(const River &rhs) const;
+
+    bool operator!=(const River &rhs) const;
+
     bool isAdjacent(const River &other) const;
+
+    static const River EMPTY;
 };
 
 class GameState {

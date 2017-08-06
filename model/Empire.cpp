@@ -31,7 +31,7 @@ void Empire::addRiver(const River &river) {
     }
 
     if (first_adjacent == components.end()) {
-        components.emplace_back(&game, punterId);
+        components.push_back(Component(&game, punterId));
     }
 }
 
@@ -45,6 +45,15 @@ score_t Empire::getScore() const {
         result += c.getScore();
     }
     return result;
+}
+
+const Component *Empire::getByVertex(vert_t vertex) const {
+    for (const Component &c : components) {
+        if (c.getVertices().find(vertex) != c.getVertices().end()) {
+            return &c;
+        }
+    }
+    return NULL;
 }
 
 Component::Component(const GameState *game, vert_t punterId) : game(game), score(0) {
@@ -137,4 +146,8 @@ long Component::distanceTo(const Component &other) const {
 
 const std::vector<River> &Component::getRivers() const {
     return rivers;
+}
+
+const std::unordered_set<vert_t> &Component::getVertices() const {
+    return vertices;
 }

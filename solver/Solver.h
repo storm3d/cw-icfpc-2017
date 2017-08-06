@@ -7,7 +7,7 @@
 
 /** A decision proposed by a strategy */
 struct StrategyDecision {
-    std::pair<vert_t, vert_t> river;
+    River river;
     /** Immediate score increase */
     score_t scoreIncrease;
     /**
@@ -16,9 +16,9 @@ struct StrategyDecision {
      * */
     long riskIfNot;
 
-    inline bool isEmpty() const { return river == std::pair<vert_t, vert_t> (0, 0); };
+    inline bool isEmpty() const { return river == River::EMPTY; };
 
-    StrategyDecision() : river(0, 0), scoreIncrease(0), riskIfNot(0) {}
+    StrategyDecision() : river(River::EMPTY), scoreIncrease(0), riskIfNot(0) {}
 };
 
 struct ISolverStrategy {

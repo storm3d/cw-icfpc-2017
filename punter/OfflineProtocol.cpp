@@ -1,4 +1,5 @@
 
+#include <queue>
 #include "OfflineProtocol.h"
 
 void OfflineProtocol::handleRequest(std::istream &in, std::ostream &out) {
@@ -132,6 +133,7 @@ void OfflineProtocol::writeSetupResponse(std::ostream &out, GameState *state) {
 void OfflineProtocol::writeMoveResponse(std::ostream &out, GameState *state) {
 
     // rough algo
+    std::queue<punter_t> wave;
 
     // occupy mines first
     for (auto& mine : state->getMines()) {
@@ -144,10 +146,35 @@ void OfflineProtocol::writeMoveResponse(std::ostream &out, GameState *state) {
                 state->serialize(out);
                 out << "}";
                 return;
-            }}
+            }
+            else if(edge.second == state->getPunterId()) {
+                wave.push(edge.first);
+            }
+        }
     }
 
     // try to occupy sites
+    while (!wave.empty())
+    {
+        int site = wave.front();
+        for (auto& edge : state->getEdgesFrom(site)) {
+            if (edge.second == -1) {
+
+                out << "{\"claim\":{\"punter\":" << state->getPunterId() << ", \"source\":" << site;
+                out << ", \"target\":" << edge.first;
+                out << "}, \"state\": ";
+                state->serialize(out);
+                out << "}";
+                return;
+            } else if (edge.second == state->getPunterId()) {
+                wave.push(edge.first);
+            }
+        }
+        wave.pop();
+
+    }
+
+    /*
     for (auto site = 0; site < state->getSitesNum(); site++) {
         for (auto& edge : state->getEdgesFrom(site)) {
             if(edge.second == -1) {
@@ -159,7 +186,7 @@ void OfflineProtocol::writeMoveResponse(std::ostream &out, GameState *state) {
                 out << "}";
                 return;
             }}
-    }
+    }*/
 
     out << "{\"pass\":{\"punter\":" << state->getPunterId();
     out << "}, \"state\": ";
