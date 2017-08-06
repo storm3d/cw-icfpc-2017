@@ -1,6 +1,7 @@
 #include <catch.hpp>
 #include "../model/GameState.h"
 #include "../model/Solver.h"
+#include "../punter/OfflineProtocol.h"
 
 using std::string;
 
@@ -20,9 +21,15 @@ string problem = R"(
 })";
 
 TEST_CASE("Prolongate") {
-    GameState game(problem);
+
+    OfflineProtocol dummy;
+    json j = json::parse(problem);
+    auto game = dummy.extractStateFromSetupRequest(j);
+    game->initMinDistances();
+
+    game->claimEdge(0, 1, game->getPunterId());
 
     Prolongate prolonger;
-    StrategyDecision d = prolonger.proposedMove(game);
+    StrategyDecision d = prolonger.proposedMove(*game.get());
     REQUIRE(d.scoreIncrease == 1);
 }

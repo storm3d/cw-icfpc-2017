@@ -31,7 +31,7 @@ void Empire::addRiver(const River &river) {
     }
 
     if (first_adjacent == components.end()) {
-        components.emplace_back(&game, punterId);
+        components.push_back(Component(&game, punterId));
     }
 }
 

@@ -1,11 +1,7 @@
 #include "Solver.h"
 #include "Empire.h"
 
-class Dijkstra {
-};
-
 std::pair<vert_t, vert_t> Solver::riverToClaim(GameState &game) {
-    Dijkstra stub;
     Empire empire(game, 0);
 
     // 1. Continue whatever longest path I have.
@@ -19,7 +15,7 @@ std::pair<vert_t, vert_t> Solver::riverToClaim(GameState &game) {
     // 2. Claim whatever free river adjacent to a mine.
     for (auto mine : game.getMines()) {
         for (auto edge : game.getEdgesFrom(mine)) {
-            if (edge.second == 0) {
+            if (edge.second == -1) {
                 return {mine, edge.first};
             }
         }
@@ -48,10 +44,10 @@ StrategyDecision Prolongate::proposedMove(GameState &game) {
             for (auto continuation : game.getEdgesFrom(river_end)) {
                 vert_t path_next_vertex = continuation.first;
                 // not claimed.
-                if (continuation.second == 0) {
+                if (continuation.second == -1) {
 
                     auto newEmpire = empire;
-                    newEmpire.addRiver(r);
+                    newEmpire.addRiver(River(river_end, continuation.first));
 
                     score_t scoreIncrease = newEmpire.getScore() - empire.getScore();
                     if (scoreIncrease > decision.scoreIncrease) {

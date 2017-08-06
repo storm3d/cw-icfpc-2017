@@ -8,6 +8,8 @@
 using json = nlohmann::json;
 using namespace std;
 
+const River River::EMPTY = River(0, 0);
+
 River::River(vert_t from_, vert_t to_)
 {
     if (from > to) {
@@ -25,6 +27,14 @@ bool River::isAdjacent(const River &other) const {
             || to == other.to
             || to == other.from
             || from == other.to;
+}
+
+bool River::operator==(const River &rhs) const {
+    return from == rhs.from && to == rhs.to;
+}
+
+bool River::operator!=(const River &rhs) const {
+    return !(rhs == *this);
 }
 
 GameState::GameState() {
@@ -213,7 +223,15 @@ void GameState::claimEdge(vert_t from, vert_t to, punter_t punter)  {
     auto it = incidence_list[from].find(to);
     if (it != incidence_list[from].end())
     {
+        int inc = incidence_list[from][to];
         incidence_list[from][to] = punter;
+    }
+
+    it = incidence_list[to].find(from);
+    if (it != incidence_list[to].end())
+    {
+        int inc = incidence_list[to][from];
+        incidence_list[to][from] = punter;
     }
 }
 
@@ -252,14 +270,15 @@ void GameState::initMinDistances()
     vert_t vertices_num = incidence_list.size();
     vert_t mines_num = mines.size();
 
-    for (vert_t i : mines) {
-        std::vector<std::vector<vert_t>> adj(getEdgesFrom(i).size());
+    for (vert_t mine : mines) {
+        std::vector<std::vector<vert_t>> adj(getSitesNum());
 
-        for (std::pair<vert_t, punter_t> v : getEdgesFrom(i)) {
-            adj[i].push_back(v.first);
+        for (std::pair<vert_t, punter_t> v : getEdgesFrom(mine)) {
+            adj[mine].push_back(v.first);
+            adj[v.first].push_back(mine);
         }
         std::vector<vert_t> vertext_distances(vertices_num);
-        Dijkstra(i, adj, vertext_distances);
-        min_distances[i] = vertext_distances;
+        Dijkstra(mine, adj, vertext_distances);
+        min_distances[mine] = vertext_distances;
     }
 }
