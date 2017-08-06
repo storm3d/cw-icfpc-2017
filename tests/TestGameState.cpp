@@ -11,57 +11,54 @@
 
 using nlohmann::json;
 
-static GameState deserializeState()
-{
-    std::istringstream iss ("{\"punter\":0,\n"
-                                    "\"punters\":2,\n"
-                                    "\"map\":{\"sites\":[{\"id\":4},{\"id\":1},{\"id\":3},{\"id\":6},{\"id\":5},{\"id\":0},{\"id\":7},{\"id\":2}],\n"
-                                    "\"rivers\":[{\"s\":3,\"t\":4,\"p\":0},{\"s\":0,\"t\":1,\"p\":0},{\"s\":2,\"t\":3,\"p\":0},\n"
-                                    "{\"s\":1,\"t\":3,\"p\":0},{\"s\":5,\"t\":6,\"p\":0},{\"s\":4,\"t\":5,\"p\":0},\n"
-                                    "{\"s\":3,\"t\":5,\"p\":0},{\"s\":6,\"t\":7,\"p\":0},{\"s\":5,\"t\":7,\"p\":0},\n"
-                                    "{\"s\":1,\"t\":7,\"p\":0},{\"s\":0,\"t\":7,\"p\":0},{\"s\":1,\"t\":2,\"p\":0}],\n"
-                                    "\"mines\":[1,5]}}");
-
-    json j;
-    iss >> j;
+static GameState deserializeState() {
+    std::istringstream iss("{\"punter\":0,\n"
+                                   "\"punters\":2,\n"
+                                   "\"turn\":0,\n"
+                                   "\"map\":{\"sites\":[{\"id\":4},{\"id\":1},{\"id\":3},{\"id\":6},{\"id\":5},{\"id\":0},{\"id\":7},{\"id\":2}],\n"
+                                   "\"rivers\":[{\"s\":3,\"t\":4,\"p\":0},{\"s\":0,\"t\":1,\"p\":0},{\"s\":2,\"t\":3,\"p\":0},\n"
+                                   "{\"s\":1,\"t\":3,\"p\":0},{\"s\":5,\"t\":6,\"p\":0},{\"s\":4,\"t\":5,\"p\":0},\n"
+                                   "{\"s\":3,\"t\":5,\"p\":0},{\"s\":6,\"t\":7,\"p\":0},{\"s\":5,\"t\":7,\"p\":0},\n"
+                                   "{\"s\":1,\"t\":7,\"p\":0},{\"s\":0,\"t\":7,\"p\":0},{\"s\":1,\"t\":2,\"p\":0}],\n"
+                                   "\"mines\":[1,5]}}");
 
     GameState state;
-    state.deserialize(j);
+    state.deserialize(iss);
     return state;
 }
 
-TEST_CASE( "GameState.getPuntersNum() should return correct value", "[GameState]" ) {
-    REQUIRE(deserializeState().getPuntersNum() == 2 );
+TEST_CASE("GameState.getPuntersNum() should return correct value", "[GameState]") {
+    REQUIRE(deserializeState().getPuntersNum() == 2);
 }
 
-TEST_CASE( "GameState.getSitesNum() should return correct value", "[GameState]" ) {
-    REQUIRE(deserializeState().getSitesNum() == 8 );
+TEST_CASE("GameState.getSitesNum() should return correct value", "[GameState]") {
+    REQUIRE(deserializeState().getSitesNum() == 8);
 }
 
-TEST_CASE( "GameState.getPunterId() should return correct value", "[GameState]" ) {
-    REQUIRE(deserializeState().getPunterId() == 0 );
+TEST_CASE("GameState.getPunterId() should return correct value", "[GameState]") {
+    REQUIRE(deserializeState().getPunterId() == 0);
 }
 
-TEST_CASE( "GameState.isEdge() should return correct value", "[GameState]" ) {
-    REQUIRE(deserializeState().isEdge(3, 4) );
-    REQUIRE( !deserializeState().isEdge(3, 7) );
+TEST_CASE("GameState.isEdge() should return correct value", "[GameState]") {
+    REQUIRE(deserializeState().isEdge(3, 4));
+    REQUIRE(!deserializeState().isEdge(3, 7));
 }
 
-TEST_CASE( "GameState.isMine() should return correct value", "[GameState]" ) {
-    REQUIRE(deserializeState().isMine(5) );
-    REQUIRE( !deserializeState().isMine(2) );
+TEST_CASE("GameState.isMine() should return correct value", "[GameState]") {
+    REQUIRE(deserializeState().isMine(5));
+    REQUIRE(!deserializeState().isMine(2));
 }
 
-TEST_CASE( "GameState serialization" ) {
+TEST_CASE("GameState serialization") {
     std::ostringstream os;
     deserializeState().serialize(os);
 
     std::string s = os.str();
 
     nlohmann::json jee = nlohmann::json::parse(s);
-    REQUIRE( jee["punters"] == 2 );
-    REQUIRE( jee["punter"] == 0 );
-    REQUIRE( jee["map"]["mines"].size() == 2 );
+    REQUIRE(jee["punters"] == 2);
+    REQUIRE(jee["punter"] == 0);
+    REQUIRE(jee["map"]["mines"].size() == 2);
 }
 
 TEST_CASE("GameState serialization contains river punters") {

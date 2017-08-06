@@ -86,9 +86,9 @@ void GameState::serialize(std::ostream &out) const {
             out << "{\"s\":" << v1 << ",\"t\":" << vi.first << ",\"p\":" << vi.second << '}';
         }
     }
-    out     << "], "; // rivers
+    out << "], "; // rivers
 
-    out     << "\"mines\": [";
+    out << "\"mines\": [";
     comma = false;
     for (vert_t v : mines)
     {
@@ -96,9 +96,9 @@ void GameState::serialize(std::ostream &out) const {
             out << ',';
         }
         comma = true;
-        out     << v;
+        out << v;
     }
-    out     << "] "; // mines
+    out << "] "; // mines
 
 
     out << "}"; // map
