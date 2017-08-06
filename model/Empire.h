@@ -14,21 +14,17 @@ private:
     score_t score;
     const GameState *game;
     std::unordered_set<vert_t> vertices;
-public:
-    const std::unordered_set<vert_t> &getVertices() const;
-
-private:
     std::vector<River> rivers;
 
     void recalculateScore();
 public:
     explicit Component(const GameState *game, vert_t punterId);
     Component(const Component &other) = default;
-//    Component & operator= (const Component &);
 
     void addRiver(const River &r);
     void add(const Component &other);
 
+    const std::unordered_set<vert_t> & getVertices() const;
     const std::vector<River> & getRivers() const;
 
     bool isAdjacent(const River &r) const;
@@ -39,17 +35,21 @@ public:
 };
 
 
-/// Let's call the entirety of one player's rivers (and mines) an Empire.
-/// Empire directly defines the player's score.
-class Empire {
+/**
+ * Let's call the entirety of one player's rivers (and mines) an Empire.
+ * Empire directly defines the player's score.
+ */
+class Empire : public IGameUpdater {
     std::vector<Component> components;
-    const GameState& game;
-    vert_t punterId;
+    GameState& game;
+    punter_t punterId;
 
 public:
-    explicit Empire(const GameState &game_, vert_t punterId);
+    explicit Empire(GameState &game_, punter_t punterId);
 
     void addRiver(const River &river);
+
+    void claimEdge(vert_t i, vert_t j, punter_t punter) override;
 
     // ALL the player's paths.
     const std::vector<Component> & getComponents() const;

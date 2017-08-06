@@ -29,11 +29,23 @@ struct River {
     static const River EMPTY;
 };
 
-class GameState {
+/**
+ * A bit ugly way to keep all the
+ */
+struct IGameUpdater {
+    virtual void claimEdge(vert_t i, vert_t j, punter_t punter) = 0;
+};
+
+// Work around LLDB aggressive
+template class std::vector<vert_t>;
+template class std::unordered_map<vert_t, std::vector<vert_t>>;
+
+
+class GameState : public IGameUpdater {
 public:
     GameState();
-    GameState(std::istream &in);
-    GameState(std::string json);
+    explicit GameState(std::istream &in);
+    explicit GameState(std::string json);
 
     void serialize(std::ostream &out) const;
 
@@ -64,6 +76,9 @@ public:
 
     const std::unordered_map<vert_t, punter_t> &getEdgesFrom(vert_t vertex) const;
 
+    /// FIXME: Repeated group of field/method. Separate into a class (and extract Map class too).
+    const std::unordered_map<vert_t, punter_t> &getAvailableEdgesFrom(vert_t vertex) const;
+
     const std::unordered_map<vert_t, std::vector<vert_t>> &getMinDistances() const;
 
     //void complementEdges();
@@ -73,6 +88,9 @@ public:
 private:
 
     std::vector<VertexIncidence> incidence_list;
+
+    /** Map that is still available to us (claimed by us or unclaimed) */
+    std::vector<VertexIncidence> incidence_available;
 
     std::unordered_set<vert_t> mines;
 
@@ -121,6 +139,9 @@ public:
         state->punters_num = punters_num;
         state->mines = mines;
         state->incidence_list = incidence_list;
+        // TODO: When we read other player's moves, remove edges from here.
+        // This is already done in gameState::claimEdge(), so it's wise to use it to record moves.
+        state->incidence_available = incidence_list;
 
         // NO NEED TO DO THIS, we do it on deserialization
         //state->complementEdges();

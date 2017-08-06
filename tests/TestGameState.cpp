@@ -16,10 +16,10 @@ static GameState deserializeState()
     std::istringstream iss ("{\"punter\":0,\n"
                                     "\"punters\":2,\n"
                                     "\"map\":{\"sites\":[{\"id\":4},{\"id\":1},{\"id\":3},{\"id\":6},{\"id\":5},{\"id\":0},{\"id\":7},{\"id\":2}],\n"
-                                    "\"rivers\":[{\"source\":3,\"target\":4,\"punter\":0},{\"source\":0,\"target\":1,\"punter\":0},{\"source\":2,\"target\":3,\"punter\":0},\n"
-                                    "{\"source\":1,\"target\":3,\"punter\":0},{\"source\":5,\"target\":6,\"punter\":0},{\"source\":4,\"target\":5,\"punter\":0},\n"
-                                    "{\"source\":3,\"target\":5,\"punter\":0},{\"source\":6,\"target\":7,\"punter\":0},{\"source\":5,\"target\":7,\"punter\":0},\n"
-                                    "{\"source\":1,\"target\":7,\"punter\":0},{\"source\":0,\"target\":7,\"punter\":0},{\"source\":1,\"target\":2,\"punter\":0}],\n"
+                                    "\"rivers\":[{\"s\":3,\"t\":4,\"p\":0},{\"s\":0,\"t\":1,\"p\":0},{\"s\":2,\"t\":3,\"p\":0},\n"
+                                    "{\"s\":1,\"t\":3,\"p\":0},{\"s\":5,\"t\":6,\"p\":0},{\"s\":4,\"t\":5,\"p\":0},\n"
+                                    "{\"s\":3,\"t\":5,\"p\":0},{\"s\":6,\"t\":7,\"p\":0},{\"s\":5,\"t\":7,\"p\":0},\n"
+                                    "{\"s\":1,\"t\":7,\"p\":0},{\"s\":0,\"t\":7,\"p\":0},{\"s\":1,\"t\":2,\"p\":0}],\n"
                                     "\"mines\":[1,5]}}");
 
     json j;
@@ -127,5 +127,16 @@ TEST_CASE("Game state has complemented adjucency list") {
 //    REQUIRE(state->getMinDistances().at(0)[1] == 1);
 //    REQUIRE(state->getMinDistances().at(0)[2] == 2);
 //}
+
+TEST_CASE("GameState::initMinDistances") {
+    auto game = deserializeState();
+    game.initMinDistances();
+
+    REQUIRE(game.getMinDistances().at(1).at(0) == 1);
+    REQUIRE(game.getMinDistances().at(0).at(1) == 1);
+    REQUIRE(game.getMinDistances().at(1).at(5) == 2);
+    REQUIRE(game.getMinDistances().at(0).at(4) == 3);
+    REQUIRE(game.getMinDistances().at(6).at(2) == 3);
+}
 
 #pragma clang diagnostic pop

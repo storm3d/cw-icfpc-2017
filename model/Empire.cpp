@@ -1,7 +1,7 @@
 #include <cassert>
 #include "Empire.h"
 
-Empire::Empire(const GameState &game_, vert_t punterId)
+Empire::Empire(GameState &game_, punter_t punterId)
         : game(game_), punterId(punterId)
 {
     for (vert_t v = 0; v < game.getSitesNum(); v++) {
@@ -32,6 +32,7 @@ void Empire::addRiver(const River &river) {
 
     if (first_adjacent == components.end()) {
         components.push_back(Component(&game, punterId));
+        components.back().addRiver(river);
     }
 }
 
@@ -54,6 +55,14 @@ const Component *Empire::getByVertex(vert_t vertex) const {
         }
     }
     return NULL;
+}
+
+void Empire::claimEdge(vert_t i, vert_t j, punter_t punter) {
+    if (punter == game.getPunterId()) {
+        addRiver(River(i, j));
+    }
+
+    game.claimEdge(i, j, punter);
 }
 
 Component::Component(const GameState *game, vert_t punterId) : game(game), score(0) {
@@ -104,7 +113,9 @@ void Component::recalculateScore() {
         
         for (auto v : vertices) {
             auto d = game->getMinDistances().at(mine)[v];
-            score += d*d;
+            if (d != INT_MAX) {
+                score += d*d;
+            }
         }
     }
 }
