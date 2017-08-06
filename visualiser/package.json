@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node static_server.js",
-    "server": "node $NODE_DEBUG_OPTION socket_server.js",
+    "server": "node socket_server.js",
+    "server-debug": "node $NODE_DEBUG_OPTION socket_server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
