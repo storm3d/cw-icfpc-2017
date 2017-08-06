@@ -46,22 +46,21 @@ TEST_CASE("ISolverStrategy") {
 
     SECTION("'Prolongate existing' strategy") {
         StrategyDecision d = prolonger.proposedMove();
-        CAPTURE(d.river);
-        REQUIRE(d.scoreIncrease == 1);
-        REQUIRE(d.river == River(5, 7)); // bad, bad assertion! We dunno what river it will pick.
-
-        prolonger.claimEdge(d.river.from, d.river.to, game->getPunterId());
-
-        d = prolonger.proposedMove();
-        CAPTURE(d.river);
-        REQUIRE(d.scoreIncrease == 4);
-        REQUIRE(d.river == River(0, 1));
-
-        prolonger.claimEdge(d.river.from, d.river.to, game->getPunterId());
-
-        d = prolonger.proposedMove();
-        CAPTURE(d.river);
+        REQUIRE(d.river == River(5, 7));
         REQUIRE(d.scoreIncrease == 9);
-        REQUIRE(d.river == River(1, 2));
+
+        prolonger.claimEdge(d.river.from, d.river.to, game->getPunterId());
+
+        d = prolonger.proposedMove();
+        CAPTURE(d.river);
+        REQUIRE(d.scoreIncrease == 5);
+//        REQUIRE(d.river == River(0, 1));  // bad, bad assertion! We dunno what river it will pick this time.
+
+        prolonger.claimEdge(d.river.from, d.river.to, game->getPunterId());
+
+        d = prolonger.proposedMove();
+        CAPTURE(d.river);
+        REQUIRE(d.scoreIncrease == 5);
+//        REQUIRE(d.river == River(1, 2));
     }
 }
