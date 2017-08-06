@@ -99,6 +99,12 @@ const getEdge = ({ source, target }) => {
   return es;
 };
 
+const showUserInfo = (punterId) => {
+  $('#user-info')
+    .css({ backgroundColor: getPunterColour(punterId) })
+    .html(punterId);
+};
+
 handleMessageQueue();
 
 $('#pause').click(() => (paused === true) ? resume() : pause());

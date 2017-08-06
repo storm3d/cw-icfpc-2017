@@ -13,13 +13,14 @@ const relayPort = 9998;
 /* Graph rendering */
 
 const colours =
-  ["red",
-    "green",
-    "#ff7f0e",
+  [
+    "white",
+    "yellow",
+    "rgb",
     "#ffbb78",
     "#2ca02c",
     "#98df8a",
-    "#d62728",
+    "green",
     "#ff9896",
     "#9467bd",
     "#c5b0d5",
@@ -35,6 +36,10 @@ const colours =
     "#9edae5"];
 
 function getPunterColour(punter) {
+  if (punter === punterID) {
+    return 'red';
+  }
+
   return colours[punter % colours.length];
 }
 
@@ -354,6 +359,7 @@ function handleMessage(message) {
       punterID = msg.punter;
       numPunters = msg.punters;
 
+      showUserInfo(punterID);
       logInfo("our punter ID: " + punterID);
       logInfo("number of punters: " + numPunters);
       logInfo("received initial game graph: " + JSON.stringify(msg.map));
