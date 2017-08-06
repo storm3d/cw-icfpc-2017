@@ -117,7 +117,7 @@ struct runner_state{
       m_States.push_back(j);
       m_Moves.push_back(create_pass_move(i));
     }
-    turns = 1;
+    turns = map["rivers"].size();
   }
 
   void process_response(int punter, const json& data)
@@ -147,17 +147,13 @@ struct runner_state{
 
   }
 
-  json m_Move;
-  void finish_process()
-  {
-    json moves = m_Moves;
-    m_Move["move"]["moves"] = moves;
-  }
-
   json create_move_query(int punter)
   {
-    m_Move["state"] = m_States[punter]["state"];
-      return m_Move;
+      json res;
+      json moves = m_Moves;
+      res["move"]["moves"] = moves;
+      res["state"] = m_States[punter]["state"];
+      return res;
   }
 
 } g_State;
@@ -208,19 +204,14 @@ int main(int argc, char *argv[]) {
         std::cout<<response<<std::endl;
       g_State.process_response(i, parse_response(response));
     }
-    g_State.finish_process();
 
-    //std::cout<<g_State.m_Move.dump(1)<<std::endl;
-    
     for(int turn = 0; turn < g_State.turns; turn++)
     {
-      for (int i = 0; i < g_Punters; i++)
-      {
-        json test = g_State.create_move_query(i);
-        std::string response = call_punter(i, test);
-        g_State.process_response(i, parse_response(response));
-      }
-      g_State.finish_process();
+        int punter = turn % g_Punters;
+        json test = g_State.create_move_query(punter);
+        std::string response = call_punter(punter, test);
+        std::cout<<response<<std::endl;
+        g_State.process_response(punter, parse_response(response));
     }
     return 0;
 }
