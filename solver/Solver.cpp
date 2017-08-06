@@ -80,12 +80,6 @@ StrategyDecision Prolongate::proposedMove() {
 
 StrategyDecision Incept::proposedMove() {
     StrategyDecision decision;
-//    double max_mine_risk = 0;
-
-    long unused_mines = std::count_if(
-            game.getMines().begin(),
-            game.getMines().end(),
-            [this](vert_t v) { return this->empire.getByVertex(v) == nullptr; });
 
     for (vert_t mine : game.getMines()) {
 
@@ -101,9 +95,9 @@ StrategyDecision Incept::proposedMove() {
             continue;
         }
 
-        score_t mineRisk = game.getSitesNum() / available_edges;
-        if (mineRisk > decision.riskIfNot) {
-            decision.riskIfNot = mineRisk;
+        double mineLossRisk = 10.0 / available_edges;
+        if (mineLossRisk > decision.riskIfNot) {
+            decision.riskIfNot = mineLossRisk;
             decision.scoreIncrease = 1;
             // Just pick the first edge. TODO: Use another strategy to select one, like, whom?..
             auto continuation = game.getAvailableEdgesFrom(mine).begin();
@@ -136,8 +130,8 @@ River Solver::riverToClaim() {
             decisions.begin(),
             decisions.end(),
             [](StrategyDecision a, StrategyDecision b) {
-                return a.scoreIncrease - a.riskIfNot * RISK_COEFFICIENT
-                       > b.scoreIncrease - b.riskIfNot * RISK_COEFFICIENT;
+                return a.scoreIncrease + a.riskIfNot * RISK_COEFFICIENT
+                       < b.scoreIncrease + b.riskIfNot * RISK_COEFFICIENT;
             });
 
     return decision_it->river;
@@ -159,4 +153,8 @@ void Solver::claimEdge(vert_t i, vert_t j, punter_t punter) {
     for (auto strat : strategies) {
         strat->claimEdge(i, j, punter);
     }
+}
+
+const Empire &Solver::getEmpire() const {
+    return empire;
 }

@@ -38,6 +38,22 @@ TEST_CASE("ISolverStrategy") {
     REQUIRE(game->getMinDistances().at(1)[5] == 2);
     REQUIRE(game->getMinDistances().at(5)[1] == 2);
 
+    SECTION("Whole Solver") {
+        Solver solver(*game);
+
+        River r = solver.riverToClaim();
+        solver.claimEdge(r.from, r.to, game->getPunterId());
+        REQUIRE(solver.getEmpire().getScore() == 1);
+
+        r = solver.riverToClaim();
+        solver.claimEdge(r.from, r.to, game->getPunterId());
+        REQUIRE(solver.getEmpire().getScore() == 10);
+
+        r = solver.riverToClaim();
+        solver.claimEdge(r.from, r.to, game->getPunterId());
+        REQUIRE(solver.getEmpire().getScore() == 15);
+    }
+
     SECTION("This one is not supposed to work on completely empty graph") {
         StrategyDecision d = prolonger.proposedMove();
         REQUIRE(d.isEmpty());
@@ -46,8 +62,10 @@ TEST_CASE("ISolverStrategy") {
     SECTION("'Incept' strategy") {
         Incept incept(*game, empire);
         StrategyDecision d = incept.proposedMove();
+        CAPTURE(d.river)
         REQUIRE(d.scoreIncrease == 1);
 
+        empire.claimEdge(d.river.from, d.river.to, game->getPunterId());
         incept.claimEdge(d.river.from, d.river.to, game->getPunterId());
         StrategyDecision d2 = incept.proposedMove();
         REQUIRE(d2.scoreIncrease == 1);
@@ -57,6 +75,7 @@ TEST_CASE("ISolverStrategy") {
         REQUIRE(has5);
     }
 
+    empire.claimEdge(1, 7, game->getPunterId());
     prolonger.claimEdge(1, 7, game->getPunterId());
 
     SECTION("'Prolongate existing' strategy") {
@@ -64,11 +83,13 @@ TEST_CASE("ISolverStrategy") {
         REQUIRE(d.river == River(5, 7));
         REQUIRE(d.scoreIncrease == 9);
 
+        empire.claimEdge(d.river.from, d.river.to, game->getPunterId());
         prolonger.claimEdge(d.river.from, d.river.to, game->getPunterId());
 
         d = prolonger.proposedMove();
         REQUIRE(d.scoreIncrease == 5);
 
+        empire.claimEdge(d.river.from, d.river.to, game->getPunterId());
         prolonger.claimEdge(d.river.from, d.river.to, game->getPunterId());
 
         d = prolonger.proposedMove();
@@ -89,6 +110,6 @@ TEST_CASE("Empire_can_claimEdge") {
     auto game = dummy.extractStateFromSetupRequest(j);
     game->initMinDistances();
     Empire empire(*game, game->getPunterId());
-    empire.claimEdge(278, 302, 0);
+    empire.claimEdge(game->toInternalId(278), game->toInternalId(302), 0);
 }
 
