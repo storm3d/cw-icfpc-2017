@@ -6,3 +6,4 @@ cmake-build-release/
 bin/
 /Makefile
 log.json
+icfp-*.tar.gz
