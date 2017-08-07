@@ -76,6 +76,17 @@ std::unique_ptr<GameState> OfflineProtocol::extractStateFromSetupRequest(json &s
     builder.punter_id_ref() = setup_request["punter"];
     builder.punters_num_ref() = setup_request["punters"];
 
+    if (setup_request.find("settings") != setup_request.end())
+    {
+        auto j_map_settings = setup_request["settings"];
+        if(j_map_settings.find("options") != j_map_settings.end())
+            builder.map_settings_ref().hasOptions = j_map_settings["options"];
+        if(j_map_settings.find("futures") != j_map_settings.end())
+            builder.map_settings_ref().hasFutures = j_map_settings["futures"];
+        if(j_map_settings.find("splurges") != j_map_settings.end())
+            builder.map_settings_ref().hasSplurges = j_map_settings["splurges"];
+    }
+
     if (setup_request["map"].is_object()) {
         json &map = setup_request["map"];
         if (map["sites"].is_array()) {

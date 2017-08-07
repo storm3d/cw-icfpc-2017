@@ -60,6 +60,7 @@ void GameState::serialize(std::ostream &out) const {
     out << "{\"punter\":" << punter_id << ','
         << "\"turn\":" << currentTurn << ','
         << "\"punters\":" << punters_num << ','
+        << "\"settings\":{\"f\":" << map_settings.hasFutures << ",\"s\":" << map_settings.hasSplurges<< ",\"o\":" << map_settings.hasOptions<<"},"
         << "\"map\": {";
 
     out << "\"sites\": [";
@@ -128,6 +129,9 @@ void GameState::deserialize(nlohmann::json &state) {
     punters_num = state["punters"];
     punter_id = state["punter"];
     currentTurn = state["turn"];
+    map_settings.hasFutures = state["settings"]["f"];
+    map_settings.hasOptions = state["settings"]["o"];
+    map_settings.hasSplurges = state["settings"]["s"];
     currentTurn++;
 
     if (state["map"].is_object()) {
@@ -354,6 +358,7 @@ std::unique_ptr<GameState> GameStateBuilder::build() {
 
     state->punter_id = punter_id;
     state->punters_num = punters_num;
+    state->map_settings = map_settings;
 
     state->remap_ids = !sites.empty()
                        && (*sites.rbegin() != sites.size() - 1 || *sites.begin() != 0);

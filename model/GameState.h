@@ -117,7 +117,14 @@ public:
 
     const vert_t toExternalId(vert_t internalId);
 
+    struct Settings{
+        bool hasFutures = false;
+        bool hasSplurges = false;
+        bool hasOptions = false;
+        Settings(bool hasFutures, bool hasSplurges, bool hasOptions);
+    };
 private:
+    Settings map_settings = Settings(false, false, false);
     bool remap_ids;
     std::vector<vert_t> internal_to_external_id_mapping;
     std::unordered_map<vert_t, vert_t> external_to_internal_id_mapping;
@@ -154,6 +161,7 @@ private:
     std::unordered_set<vert_t> mines;
     vert_t punter_id = 0;
     vert_t punters_num = 0;
+    GameState::Settings map_settings = GameState::Settings(false, false, false);
 
 public:
     void add_river(vert_t from, vert_t to, punter_t punter);
@@ -172,6 +180,10 @@ public:
 
     vert_t &punters_num_ref() {
         return punters_num;
+    }
+
+    GameState::Settings &map_settings_ref() {
+        return map_settings;
     }
 
     std::unique_ptr<GameState> build();
