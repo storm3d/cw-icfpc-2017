@@ -61,7 +61,6 @@ void OfflineProtocol::handleRequest(std::istream &in, std::ostream &out) {
         std::cerr << endl << "OUR SCORE: " << scores[state->getPunterId()] << std::endl;
         std::cerr << endl << "FINISHED IN : " << state->getCurrentTurnNum() << " TURNS" << std::endl;
     }
-
 }
 
 std::unique_ptr<GameState> OfflineProtocol::extractStateFromSetupRequest(istream &in) {
@@ -126,12 +125,38 @@ std::vector<OfflineProtocol::Move> OfflineProtocol::extractMovesFromMoveRequest(
                 OfflineProtocol::Move m(move["claim"]["punter"],
                                         move["claim"]["source"], move["claim"]["target"]);
                 moves.push_back(m);
+            } else if (move.find("splurge") != move.end()) {
+                vert_t punter = move["splurge"]["punter"];
+                bool start = true;
+                vert_t src;
+                for (auto &site_id :  move["splurge"]["route"]) {
+                    if (start) {src = site_id; start = false; continue;};
+                    int dst = site_id;
+                    OfflineProtocol::Move m(punter, src, dst);
+                    moves.push_back(m);
+                    src = dst;
+                }
             }
         }
     }
     return moves;
 }
 
+std::vector<OfflineProtocol::Option> OfflineProtocol::extractOptionsFromMoveRequest(json &move_request) {
+    std::vector<OfflineProtocol::Option> options;
+
+    json &elements = move_request["move"]["moves"];
+    if (elements.is_array()) {
+        for (auto &move : elements) {
+            if (move.find("option") != move.end()) {
+                OfflineProtocol::Option m(move["option"]["punter"],
+                                        move["option"]["source"], move["claim"]["target"]);
+                options.push_back(m);
+            }
+        }
+    }
+    return options;
+}
 std::vector<int> OfflineProtocol::extractScoresFromStopRequest(json &stop_request) {
     std::vector<int> scores;
 

@@ -52,6 +52,24 @@ static std::vector<OfflineProtocol::Move> extractSampleMovesFromMoveRequest() {
     return protocol.extractMovesFromMoveRequest(request);
 }
 
+static std::vector<OfflineProtocol::Move> extractSampleMovesFromMoveRequestSplurges() {
+
+    std::istringstream iss(R"({"move":{"moves":[
+{"splurge":{"punter":3,"route":[9,10,11,12,14]}}
+{"claim":{"punter":5,"source":0,"target":1}},
+{"claim":{"punter":6,"source":1,"target":2}},
+{"pass":{"punter":7}}
+]}})");
+
+    json request;
+    iss >> request;
+
+    OfflineProtocol protocol;
+
+    return protocol.extractMovesFromMoveRequest(request);
+}
+
+
 TEST_CASE("Setup Request GameState.getPuntersNum() should return correct value", "[GameState]") {
     REQUIRE(sampleStateFromSetupRequest().getPuntersNum() == 2);
 }
@@ -90,6 +108,14 @@ TEST_CASE("Move Request should extract only claimed edges") {
     REQUIRE(extractSampleMovesFromMoveRequest().size() == 2);
     REQUIRE(extractSampleMovesFromMoveRequest()[0] == OfflineProtocol::Move(5, 0, 1));
     REQUIRE(extractSampleMovesFromMoveRequest()[1] == OfflineProtocol::Move(6, 1, 2));
+
+    REQUIRE(extractSampleMovesFromMoveRequest().size() == 6);
+    REQUIRE(extractSampleMovesFromMoveRequest()[0] == OfflineProtocol::Move(3, 9, 10));
+    REQUIRE(extractSampleMovesFromMoveRequest()[1] == OfflineProtocol::Move(3, 10, 11));
+    REQUIRE(extractSampleMovesFromMoveRequest()[2] == OfflineProtocol::Move(3, 11, 12));
+    REQUIRE(extractSampleMovesFromMoveRequest()[3] == OfflineProtocol::Move(3, 12, 14));
+    REQUIRE(extractSampleMovesFromMoveRequest()[4] == OfflineProtocol::Move(5, 0, 1));
+    REQUIRE(extractSampleMovesFromMoveRequest()[5] == OfflineProtocol::Move(6, 1, 2));
 }
 
 TEST_CASE("Setup Request sparse site ids") {

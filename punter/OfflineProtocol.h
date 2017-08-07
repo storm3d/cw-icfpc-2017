@@ -24,6 +24,11 @@ public:
         Move(vert_t punter_id, vert_t from, vert_t to);
     };
 
+    struct Option : Move
+    {
+        Option(vert_t punter_id, vert_t from, vert_t to):Move(punter_id, from, to){};
+    };
+
     void handleRequest(std::istream &in, std::ostream &out);
 
     std::unique_ptr<GameState> extractStateFromSetupRequest(std::istream &in);
@@ -32,6 +37,7 @@ public:
     std::unique_ptr<GameState> extractCustomStateFromRequest(json &setup_request);
 
     std::vector<Move> extractMovesFromMoveRequest(json &move_request);
+    std::vector<Option> extractOptionsFromMoveRequest(json &move_request);
 
     std::vector<int> extractScoresFromStopRequest(json &stop_request);
 
