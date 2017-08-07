@@ -19,13 +19,13 @@ void OfflineProtocol::handleRequest(std::istream &in, std::ostream &out) {
         //{"ready" : p, "state" : state}
         writeSetupResponse(out, state.get());
 
-    } else if (request.find("move") != request.end()) {
+    } else if (request.find("move") != request.end() || request.find("timeout") != request.end()) {
         // move request
         std::cerr << "Handling Move request" << std::endl;
 
         //out << "{\"pass\":{\"punter\":" << 0 << "},\"state\":0}";
 
-        std::unique_ptr<GameState> state = extractStateFromMoveRequest(request);
+        std::unique_ptr<GameState> state = extractCustomStateFromRequest(request);
         std::vector<Move> moves = extractMovesFromMoveRequest(request);
 
         for (auto& move : moves) {
@@ -50,7 +50,7 @@ void OfflineProtocol::handleRequest(std::istream &in, std::ostream &out) {
         // stop request
         std::cerr << "Handling Stop request" << std::endl;
 
-        std::unique_ptr<GameState> state = extractStateFromMoveRequest(request);
+        std::unique_ptr<GameState> state = extractCustomStateFromRequest(request);
         std::vector<int> scores = extractScoresFromStopRequest(request);
 
         std::cerr << endl << "SCORES: ";
@@ -106,17 +106,18 @@ std::unique_ptr<GameState> OfflineProtocol::extractStateFromSetupRequest(json &s
     return builder.build();
 }
 
-std::unique_ptr<GameState> OfflineProtocol::extractStateFromMoveRequest(json &move_request)
+std::unique_ptr<GameState> OfflineProtocol::extractCustomStateFromRequest(json &move_request)
 {
     auto* state = new GameState();
-
     state->deserialize(move_request["state"]);
-
     return std::unique_ptr<GameState>(state);
 }
 
 std::vector<OfflineProtocol::Move> OfflineProtocol::extractMovesFromMoveRequest(json &move_request) {
     std::vector<OfflineProtocol::Move> moves;
+
+    if(!move_request["move"].is_object())
+        return moves;
 
     json &elements = move_request["move"]["moves"];
     if (elements.is_array()) {
@@ -192,6 +193,10 @@ void OfflineProtocol::writeMoveResponseTactic(std::ostream &out, GameState *stat
         return;
     }
 
+    std::cerr <<  std::endl << "Panic mode started: "
+              << float( clock () - GameState::punter_begin_time ) / CLOCKS_PER_SEC
+              << " sec" << std::endl;
+
     // if we're here it means that we are landlocked - lets try to fuckup other players
     for (vert_t v1 = 0; v1 < state->getSitesNum(); v1++) {
         for (auto &vi : state->getEdgesFrom(v1)) {
@@ -229,6 +234,10 @@ void OfflineProtocol::writeSetupResponse(std::ostream &out, GameState *state) {
 }
 
 void OfflineProtocol::writeClaimResponse(std::ostream &out, GameState *state, punter_t punterId, vert_t source, vert_t dist) {
+    std::cerr <<  std::endl << "Writing claim response started: "
+              << float( clock () - GameState::punter_begin_time ) / CLOCKS_PER_SEC
+              << " sec" << std::endl;
+
     out << "{\"claim\":{\"punter\":" << punterId;
     out << ", \"source\":" << state->toExternalId(source);
     out << ", \"target\":" << state->toExternalId(dist);

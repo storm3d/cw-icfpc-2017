@@ -29,7 +29,7 @@ public:
     std::unique_ptr<GameState> extractStateFromSetupRequest(std::istream &in);
     std::unique_ptr<GameState> extractStateFromSetupRequest(json &setup_request);
 
-    std::unique_ptr<GameState> extractStateFromMoveRequest(json &setup_request);
+    std::unique_ptr<GameState> extractCustomStateFromRequest(json &setup_request);
 
     std::vector<Move> extractMovesFromMoveRequest(json &move_request);
 

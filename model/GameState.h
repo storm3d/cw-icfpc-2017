@@ -59,6 +59,9 @@ class std::unordered_map<vert_t, std::vector<vert_t>>;
 
 class GameState : public IGameUpdater {
 public:
+    static clock_t punter_begin_time;
+    const float PANIC_TIME = 0.85;
+
     GameState();
 
     explicit GameState(std::istream &in);
