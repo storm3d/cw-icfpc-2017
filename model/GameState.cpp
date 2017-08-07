@@ -9,7 +9,7 @@ using json = nlohmann::json;
 using namespace std;
 
 const float MINE_POTENTIAL = 100;
-const int PROPAGATE_DEPTH = 10;
+const int PROPAGATE_DEPTH = 16;
 const float DRAG = 0.5;
 
 const River River::EMPTY = River(0, 0);
@@ -514,6 +514,8 @@ std::vector<PotentialEdge> GameState::getMostPotentialEdge() {
 
             if (edge.second == -1 && from_color != getColors()[to])
 //                fringeEdges.push_back({coloredPotentialAt(to, to_color), from, to});
+
+                // TODO: tweak this!
                 fringeEdges.push_back({coloredPotentialAt(from, to_color)
                                        + coloredPotentialAt(to, from_color), from, to});
         }
