@@ -25,24 +25,3 @@ endif (MINGW)
 add_executable(punter ${SOURCE_FILES})
 target_link_libraries(punter PRIVATE)
 
-set(SOURCE_FILES local_runner/local_runner.cpp
-		model/GameState.cpp
-		model/Empire.cpp
-		solver/Solver.cpp
-		punter/OfflineProtocol.cpp
-		)
-add_executable(local_runner ${SOURCE_FILES})
-
-set(SOURCE_FILES
-		tests/tests-main.cpp
-		model/GameState.cpp
-		tests/TestGameState.cpp
-		punter/OfflineProtocol.cpp
-		punter/OfflineProtocol.h
-		tests/OfflineProtocolTest.cpp
-		solver/Solver.cpp
-		model/Empire.cpp
-		model/Empire.h
-		tests/SolverTests.cpp
-		)
-add_executable(tests ${SOURCE_FILES})
