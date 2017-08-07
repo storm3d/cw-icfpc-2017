@@ -9,6 +9,8 @@ using json = nlohmann::json;
 using namespace std;
 
 const float MINE_POTENTIAL = 100;
+const int PROPAGATE_DEPTH = 10;
+const float DRAG = 0.5;
 
 const River River::EMPTY = River(0, 0);
 
@@ -420,12 +422,12 @@ void GameState::initPotentials(int depth) {
             for (auto near: incidence_list[i]) {
 
                 if (near.second == -1 || near.second == punter_id) {
-                    new_potential_list[i] = max(new_potential_list[i], potentialAt(near.first) / 10);
+                    new_potential_list[i] = max(new_potential_list[i], potentialAt(near.first) * DRAG);
 
                     for (int j = 1; j <= getMinesNum(); j++) {
 //                        new_potential_list[i + j*getSitesNum()] += potentialAt(near.first + j*getSitesNum()) / 10;
                         new_potential_list[i + j * getSitesNum()] =
-                                max(new_potential_list[i + j * getSitesNum()], potentialAt(near.first + j * getSitesNum()) / 10);
+                                max(new_potential_list[i + j * getSitesNum()], potentialAt(near.first + j * getSitesNum()) * DRAG);
                     }
                 }
 //                else if(near.second == punter_id)
@@ -491,7 +493,7 @@ potential_t GameState::coloredPotentialAt(vert_t i, int curr_color) const {
 std::vector<PotentialEdge> GameState::getMostPotentialEdge() {
 // potential algorithm
     colorOurSites();
-    initPotentials(10);
+    initPotentials(PROPAGATE_DEPTH);
 
     std::unordered_set<vert_t> froms(getOurSites());
     froms.insert(getMines().begin(), getMines().end());
