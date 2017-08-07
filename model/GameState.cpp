@@ -60,7 +60,7 @@ void GameState::serialize(std::ostream &out) const {
     out << "{\"punter\":" << punter_id << ','
         << "\"turn\":" << currentTurn << ','
         << "\"punters\":" << punters_num << ','
-        << "\"settings\":{\"f\":" << map_settings.hasFutures << ",\"s\":" << map_settings.hasSplurges<< ",\"o\":" << map_settings.hasOptions<<"},"
+        << "\"settings\":{\"f\":" << (map_settings.hasFutures?1:0) << ",\"s\":" << (map_settings.hasSplurges?1:0)<< ",\"o\":" << (map_settings.hasOptions?1:0)<<"},"
         << "\"map\": {";
 
     out << "\"sites\": [";
@@ -129,9 +129,9 @@ void GameState::deserialize(nlohmann::json &state) {
     punters_num = state["punters"];
     punter_id = state["punter"];
     currentTurn = state["turn"];
-    map_settings.hasFutures = state["settings"]["f"];
-    map_settings.hasOptions = state["settings"]["o"];
-    map_settings.hasSplurges = state["settings"]["s"];
+    map_settings.hasFutures = 1 == state["settings"]["f"];
+    map_settings.hasOptions = 1 == state["settings"]["o"];
+    map_settings.hasSplurges = 1 == state["settings"]["s"];
     currentTurn++;
 
     if (state["map"].is_object()) {
