@@ -29,12 +29,16 @@ string readJson()
 
 int main( int argc, char* argv[] ) {
 
-    const clock_t begin_time = clock();
+    GameState::punter_begin_time = clock();
 
     if(argc > 2 && !strcmp(argv[1], "-f")) {
         std::ifstream ifs(argv[2]);
         OfflineProtocol offlineProtocol;
         offlineProtocol.handleRequest(ifs, cout);
+
+        std::cerr <<  std::endl << "Execution time: "
+                  << float( clock () - GameState::punter_begin_time ) / CLOCKS_PER_SEC
+                  << " sec" << std::endl;
         return 0;
     }
 
@@ -58,14 +62,14 @@ int main( int argc, char* argv[] ) {
 
     offlineProtocol.handleRequest(iss, oss);
 
-    //cerr << endl << "writing response: " << endl;
+    cerr << endl << "writing response: " << endl;
     cerr << "out: " << endl << oss.str() << std::endl;
 
     std::cout<<oss.str().size()<<":"<<oss.str();
     //cerr << endl << "move written! " << endl;
 
     std::cerr <<  std::endl << "Execution time: "
-              << float( clock () - begin_time ) / CLOCKS_PER_SEC
+              << float( clock () - GameState::punter_begin_time ) / CLOCKS_PER_SEC
               << " sec" << std::endl;
     return 0;
 }

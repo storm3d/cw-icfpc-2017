@@ -14,6 +14,8 @@ const float DRAG = 0.5;
 
 const River River::EMPTY = River(0, 0);
 
+clock_t GameState::punter_begin_time = 0;
+
 River::River(vert_t from_, vert_t to_) {
     if (from_ > to_) {
         from = to_;
@@ -433,13 +435,31 @@ void GameState::initPotentials(int depth) {
 //                        new_potential_list[i + j*getSitesNum()] += potentialAt(near.first + j*getSitesNum()) / 10;
                         new_potential_list[i + j * getSitesNum()] =
                                 max(new_potential_list[i + j * getSitesNum()], potentialAt(near.first + j * getSitesNum()) * DRAG);
+
+                        if(float( clock () - GameState::punter_begin_time ) / CLOCKS_PER_SEC > GameState::PANIC_TIME) {
+                            std::cerr <<  std::endl << "PANIC in initPotentials: "
+                                      << float( clock () - GameState::punter_begin_time ) / CLOCKS_PER_SEC
+                                      << " sec" << std::endl;
+
+                            goto init_pot_panic;
+                        }
                     }
                 }
 //                else if(near.second == punter_id)
 //                    new_potential_list[i] += potentialAt(near.first) / 10;
             }
         }
+        init_pot_panic:
+
         potential_list = new_potential_list;
+
+        if(float( clock () - GameState::punter_begin_time ) / CLOCKS_PER_SEC > GameState::PANIC_TIME) {
+            std::cerr <<  std::endl << "PANIC 2 in initPotentials at depth " << i << " : "
+                      << float( clock () - GameState::punter_begin_time ) / CLOCKS_PER_SEC
+                      << " sec" << std::endl;
+
+            return;
+        }
     }
 }
 
@@ -496,12 +516,17 @@ potential_t GameState::coloredPotentialAt(vert_t i, int curr_color) const {
 }
 
 std::vector<PotentialEdge> GameState::getMostPotentialEdge() {
-// potential algorithm
+
+    // potential algorithm
     colorOurSites();
     initPotentials(PROPAGATE_DEPTH);
 
     std::unordered_set<vert_t> froms(getOurSites());
     froms.insert(getMines().begin(), getMines().end());
+
+    std::cerr <<  std::endl << "Enumerating fringes started: "
+              << float( clock () - punter_begin_time ) / CLOCKS_PER_SEC
+              << " sec" << std::endl;
 
     vector<PotentialEdge> fringeEdges;
 
@@ -518,8 +543,18 @@ std::vector<PotentialEdge> GameState::getMostPotentialEdge() {
                 // TODO: tweak this!
                 fringeEdges.push_back({coloredPotentialAt(from, to_color)
                                        + coloredPotentialAt(to, from_color), from, to});
+
+            if(float( clock () - GameState::punter_begin_time ) / CLOCKS_PER_SEC > GameState::PANIC_TIME) {
+                std::cerr <<  std::endl << "PANIC in getMostPotentialEdge: "
+                          << float( clock () - GameState::punter_begin_time ) / CLOCKS_PER_SEC
+                          << " sec" << std::endl;
+
+                goto potential_panic;
+            }
         }
     }
+
+    potential_panic:
 
     std::sort(fringeEdges.begin(), fringeEdges.end());
 
